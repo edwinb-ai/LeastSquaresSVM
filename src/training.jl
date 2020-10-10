@@ -16,13 +16,9 @@ function _build_omega(
     kernel::String="rbf",
     params=(γ = 1.0, σ = 2.0),
 )
-    n = size(x, 2)
-
     if kernel == "rbf"
-        prefactor = params.σ
         # Compute using KernelFunctions
-        kern_mat = KernelRBF(x, prefactor)
-        # Remove the diagonal factors
+        kern_mat = KernelRBF(x, params.σ)
         # Compute omega matrix
         Ω = (y * y') .* kern_mat
     end
