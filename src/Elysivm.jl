@@ -3,7 +3,7 @@ module Elysivm
 using KernelFunctions
 
 include("types.jl")
-export LSSVM
+export LSSVC
 
 include("training.jl")
 fit!

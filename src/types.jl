@@ -1,8 +1,10 @@
-mutable struct LSSVM
-    x::AbstractArray
-    y::AbstractArray
-    α::AbstractArray
-    b::AbstractArray
+abstract type SVM end
+
+mutable struct LSSVC{T} <: SVM
+    x::AbstractMatrix{T}
+    y::AbstractVector{T}
+    α::AbstractVector{T}
+    b::AbstractVector{T}
 end
 
-LSVM(n::Int, m::Int) = LSVM(zeros(n, m), zeros(m), zeros(m), zeros(m))
+LSSVC(n::Int, m::Int) = LSSVC(zeros(n, m), zeros(m), zeros(m), zeros(m))
