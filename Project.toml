@@ -3,6 +3,12 @@ uuid = "6bfd0e71-701c-47cd-9c90-5bf8fe84640d"
 authors = ["Edwin Bedolla"]
 version = "0.1.0"
 
+[deps]
+BenchmarkTools = "6e4b80f9-dd63-53aa-95a3-0cdb28fa8baf"
+CUDA = "052768ef-5323-5732-b1bb-66c8b64840ba"
+KernelFunctions = "ec8451be-7e33-11e9-00cf-bbf324bd1392"
+Krylov = "ba0b0d4f-ebba-5204-a429-3ac8c609bfb7"
+
 [compat]
 julia = "0.1"
 
