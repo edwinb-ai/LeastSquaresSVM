@@ -1,5 +1,3 @@
-using Elysivm
-
 @testset "Types" begin
     svm = LSSVC(3, 3)
     @test svm.x == zeros(3, 3)

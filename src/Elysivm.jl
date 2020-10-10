@@ -1,11 +1,12 @@
 module Elysivm
 
-using KernelFunctions
+using LinearAlgebra
+using Distances
 
 include("types.jl")
-export LSSVC
+export LSSVC, KernelRBF
 
 include("training.jl")
-fit!
+export fit!
 
 end
