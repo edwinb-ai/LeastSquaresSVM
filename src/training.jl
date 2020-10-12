@@ -1,4 +1,4 @@
-    function fit!(
+function fit!(
     svm::LSSVC,
     x::AbstractMatrix,
     y::AbstractVector;
@@ -10,7 +10,7 @@
     Ω = build_omega(x, y; kernel=kernel, params=params)
     H = Ω + UniformScaling(params.γ)
 
-    # * Start solving the problems
+    # * Start solving the subproblems
 
     # First, solve for eta
     η, stats = cg(H, y)
@@ -34,10 +34,14 @@
 end
 
 function predict!(svm, x;kernel::String="rbf", params=(γ = 1.0, σ = 2.0))
-    kern_mat = KernelRBF(svm.x, x, params.σ)
-    result = @. svm.y * kern_mat * svm.α
+    result = Vector{eltype(x)}(undef, size(x, 2))
 
-    return sign(sum(result) + svm.b)
+    for i in axes(x, 2)
+        kern_mat = KernelRBF(svm.x, x[:, i], params.σ)
+        result[i] = sum(@. svm.y * kern_mat * svm.α) + svm.b
+    end
+
+    return sign.(result)
 end
 
 function build_omega(

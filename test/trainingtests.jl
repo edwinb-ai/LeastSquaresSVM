@@ -21,11 +21,20 @@
     @test all(omega .== la_omega)
     @test all(omega .== loop_omega)
 
-    # ! Test a simple prediction point
+    # ! Test a single prediction point
     x_test = [2.0, 2.0]
+    x_test = reshape(x_test, 2, :)
     fit!(svm, x, y)
     result = predict!(svm, x_test)
+    display(result)
     true_result = [1.0]
+
+    @test all(result .== true_result)
+
+    # ! Test for multiple prediction points
+    x_test = [[2.0, 2.0] [3.0, 3.0] [-1.0, -1.0]]
+    result = predict!(svm, x_test)
+    true_result = [1.0, 1.0, -1.0]
 
     @test all(result .== true_result)
 end
