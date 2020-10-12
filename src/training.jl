@@ -8,7 +8,7 @@ function fit!(
     n = size(y, 1)
     # Initialize the necessary matrices
     Ω = build_omega(x, y; kernel=kernel, params=params)
-    H = Ω + UniformScaling(params.γ)
+    H = Ω + UniformScaling(1.0 / params.γ)
 
     # * Start solving the subproblems
 
