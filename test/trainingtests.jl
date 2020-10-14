@@ -2,9 +2,8 @@
     # * Setup the problem
     x = [[0.0, 0.0] [1.0, 1.0]]
     y = [-1.0, 1.0]
-    svm = LSSVC(size(x)...)
+    svm = LSSVC()
 
-    # ! Test the kernel construction
     true_kernel = [[1.0, exp(-4.0)] [exp(-4.0), 1.0]]
     loop_omega = zeros(size(x)...)
 
@@ -21,11 +20,10 @@
     @test all(omega .== la_omega)
     @test all(omega .== loop_omega)
 
-    # ! Test a single prediction point
     x_test = [2.0, 2.0]
     x_test = reshape(x_test, 2, :)
-    fit!(svm, x, y)
-    result = predict!(svm, x_test)
+    fitted = fit!(svm, x, y)
+    result = predict!(svm, fitted, x_test)
     display(result)
     true_result = [1.0]
 
@@ -33,7 +31,15 @@
 
     # ! Test for multiple prediction points
     x_test = [[2.0, 2.0] [3.0, 3.0] [-1.0, -1.0]]
-    result = predict!(svm, x_test)
+    result = predict!(svm, fitted, x_test)
+    true_result = [1.0, 1.0, -1.0]
+
+    @test all(result .== true_result)
+
+    # ! Change the hyperparameters
+    svm = LSSVC(; γ=5.0, σ=0.5)
+    fitted = fit!(svm, x, y)
+    result = predict!(svm, fitted, x_test)
     true_result = [1.0, 1.0, -1.0]
 
     @test all(result .== true_result)

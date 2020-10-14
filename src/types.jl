@@ -1,13 +1,12 @@
 abstract type SVM end
 
-mutable struct LSSVC{T} <: SVM
-    x::AbstractMatrix{T}
-    y::AbstractVector{T}
-    α::AbstractVector{T}
-    b::T
+mutable struct LSSVC <: SVM
+    kernel::String
+    γ::Float64
+    σ::Float64
 end
 
-LSSVC(n::Integer, m::Integer) = LSSVC(zeros(n, m), zeros(m), zeros(m), 0.0)
+LSSVC(; kernel="rbf", γ=1.0, σ=1.0) = LSSVC(kernel, γ, σ)
 
 mutable struct KernelRBF
     γ::Real

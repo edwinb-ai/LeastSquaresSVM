@@ -3,6 +3,9 @@ module Elysivm
 using LinearAlgebra
 using Distances
 using Krylov
+import MLJModelInterface
+
+const MMI = MLJModelInterface
 
 include("types.jl")
 export LSSVC, KernelRBF
