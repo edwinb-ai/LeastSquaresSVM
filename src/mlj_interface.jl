@@ -5,23 +5,27 @@ MMI.@mlj_model mutable struct LSSVClassifier <: MMI.Deterministic
 end
 
 function MMI.fit(model::LSSVClassifier, verbosity::Int, X, y)
-    Xmatrix = adjoint(MMI.matrix(X)) # notice the transpose
-    y_plain = MMI.int(y)
+    Xmatrix = MMI.matrix(X; transpose=true) # notice the transpose
+    y_plain = convert(Array{eltype(Xmatrix)}, MMI.int(y))
     decode  = MMI.decoder(y[1]) # for predict method
 
     cache = nothing
 
-    svm = LSSVC()
-    fit!(svm, Xmatrix, y;kernel=model.kernel, params=(γ = model.γ, σ = model.σ))
+    svm = LSSVC(;kernel=model.kernel, γ = model.γ, σ = model.σ)
+    fitted = svmtrain(svm, Xmatrix, y_plain)
 
-    fitresult = (deepcopy(svm), decode)
+    fitresult = (deepcopy(svm), fitted, decode)
+
+    report = (kernel=model.kernel, γ = model.γ, σ = model.σ)
 
     return (fitresult, cache, report)
 end
 
 function MMI.predict(model::LSSVClassifier, fitresult, Xnew)
-    (svm, decode) = fitresult
-    results = predict!(svm, Xnew;kernel=model.kernel, params=(γ = model.γ, σ = model.σ))
+    Xmatrix = MMI.matrix(Xnew; transpose=true) # notice the transpose
+    (svm, fitted, decode) = fitresult
+    results = svmpredict(svm, fitted, Xmatrix)
+    y = convert(Array{UInt64}, results)
 
-    return decode(results)
+    return decode(y)
 end

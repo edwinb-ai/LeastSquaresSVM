@@ -1,8 +1,8 @@
-function fit!(svm::LSSVC, x::AbstractMatrix, y::AbstractVector)
+function svmtrain(svm::LSSVC, x::AbstractMatrix, y::AbstractVector)
     n = size(y, 1)
     # Initialize the necessary matrices
     Ω = build_omega(x, y; kernel=svm.kernel, params=(γ = svm.γ, σ = svm.σ))
-    H = Ω + UniformScaling(1.0 / svm.γ)
+    H = Ω + I / svm.γ
 
     # * Start solving the subproblems
 
@@ -21,7 +21,7 @@ function fit!(svm::LSSVC, x::AbstractMatrix, y::AbstractVector)
     return (x, y, α, b)
 end
 
-function predict!(svm::LSSVC, fits, xnew::AbstractMatrix)
+function svmpredict(svm::LSSVC, fits, xnew::AbstractMatrix)
     result = Vector{eltype(xnew)}(undef, size(xnew, 2))
 
     x, y, α, b = fits

@@ -11,6 +11,9 @@ include("types.jl")
 export LSSVC, KernelRBF
 
 include("training.jl")
-export fit!, build_omega, predict!
+export svmtrain, build_omega, svmpredict
+
+include("mlj_interface.jl")
+export LSSVClassifier
 
 end
