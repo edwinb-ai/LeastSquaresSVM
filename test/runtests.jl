@@ -1,6 +1,6 @@
 using Elysivm
 using Test
-using MLJ
+using MLJBase, MLJ
 
 @testset "Elysivm.jl" begin
     include("typetests.jl")

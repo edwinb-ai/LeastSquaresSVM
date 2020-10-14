@@ -47,11 +47,11 @@ train, test = partition(eachindex(y), 0.80, shuffle=true, rng=11)
         measure=accuracy,
     )
     # machine = MLJ.machine(model, X, y)
-    machine = MLJ.machine(self_tuning_model, X, y)
-    MLJ.fit!(machine; rows=train)
+    machine = MLJBase.machine(self_tuning_model, X, y)
+    MLJBase.fit!(machine; rows=train)
 
-    results = MLJ.predict(machine, X[test, :])
-    acc = MLJ.accuracy(results, y[test])
+    results = MLJBase.predict(machine; rows=test)
+    acc = MLJBase.accuracy(results, y[test])
     display(acc)
 
     # Don't test for correctness, test that is works
