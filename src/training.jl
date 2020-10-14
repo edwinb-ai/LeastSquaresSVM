@@ -46,7 +46,7 @@ function build_omega(
         # Compute using KernelFunctions
         kern_mat = KernelRBF(x, params.σ)
         # Compute omega matrix
-        Ω = (y * y') .* kern_mat
+        Ω = (y .* y') .* kern_mat
     end
 
     return Ω

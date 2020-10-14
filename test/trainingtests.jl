@@ -4,22 +4,6 @@
     y = [-1.0, 1.0]
     svm = LSSVC()
 
-    true_kernel = [[1.0, exp(-4.0)] [exp(-4.0), 1.0]]
-    loop_omega = zeros(size(x)...)
-
-    for i in axes(x, 1)
-        for j in axes(x, 2)
-            loop_omega[i, j] = y[i] * y[j] * true_kernel[i, j]
-        end
-    end
-
-    la_omega = (y * y') .* true_kernel
-    @test all(loop_omega .== la_omega)
-
-    omega = build_omega(x, y)
-    @test all(omega .== la_omega)
-    @test all(omega .== loop_omega)
-
     x_test = [2.0, 2.0]
     x_test = reshape(x_test, 2, :)
     fitted = svmtrain(svm, x, y)

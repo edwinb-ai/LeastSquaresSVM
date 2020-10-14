@@ -36,12 +36,22 @@ y, X = unpack(data, ==(:class), colname -> true)
 train, test = partition(eachindex(y), 0.80, shuffle=true, rng=11)
 
 @testset "MLJ Integration" begin
-    model = Elysivm.LSSVClassifier(;γ=0.005, σ=500.0)
-    machine = MLJBase.machine(model, X, y)
-    MLJBase.fit!(machine, rows=train)
+    model = Elysivm.LSSVClassifier()
+    r1 = range(model, :γ, lower=0.0001, upper=0.1)
+    r2 = range(model, :σ, lower=0.1, upper=2.0)
+    self_tuning_model = TunedModel(
+        model=model,
+        tuning=Grid(goal=100),
+        resampling=CV(nfolds=5),
+        range=[r1, r2],
+        measure=accuracy,
+    )
+    # machine = MLJ.machine(model, X, y)
+    machine = MLJ.machine(self_tuning_model, X, y)
+    MLJ.fit!(machine; rows=train)
 
-    results = MLJBase.predict(machine, rows=test)
-    acc = MLJBase.accuracy(results, y[test])
+    results = MLJ.predict(machine, X[test, :])
+    acc = MLJ.accuracy(results, y[test])
     display(acc)
 
     # Don't test for correctness, test that is works
