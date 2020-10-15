@@ -15,6 +15,7 @@ MLJBase = "a7f614a8-145f-11e9-1d2a-a57a1082229d"
 MLJModelInterface = "e80e1ace-859a-464e-9ed9-23947d8ae3ea"
 
 [compat]
+MLJ = "0.14"
 julia = "0.1"
 
 [extras]
