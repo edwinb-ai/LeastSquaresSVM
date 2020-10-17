@@ -316,9 +316,9 @@ version = "0.3.5"
 
 [[MLJModels]]
 deps = ["CategoricalArrays", "Dates", "Distances", "Distributions", "InteractiveUtils", "LinearAlgebra", "MLJBase", "MLJModelInterface", "MLJScientificTypes", "OrderedCollections", "Parameters", "Pkg", "Random", "Requires", "StableRNGs", "Statistics", "StatsBase", "Tables"]
-git-tree-sha1 = "9aadf9482aa0c5a7d0e081da9a80b6f66b21188b"
+git-tree-sha1 = "6ca5d67642c3541a14e92414d6a5daacd5b5f9c1"
 uuid = "d491faf4-2d78-11e9-2867-c94bc002c0b7"
-version = "0.12.5"
+version = "0.12.6"
 
 [[MLJScientificTypes]]
 deps = ["CategoricalArrays", "ColorTypes", "Dates", "PrettyTables", "ScientificTypes", "Tables"]

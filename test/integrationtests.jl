@@ -33,24 +33,29 @@ categorical!(data, :class)
 
 # Split into training and testing sets
 y, X = unpack(data, ==(:class), colname -> true)
+stand1 = Standardizer()
+X = MLJBase.transform(MLJBase.fit!(MLJBase.machine(stand1, X)), X)
 train, test = partition(eachindex(y), 0.80, shuffle=true, rng=11)
 
 @testset "MLJ Integration" begin
     model = Elysivm.LSSVClassifier()
-    r1 = range(model, :γ, lower=0.0001, upper=0.1)
-    r2 = range(model, :σ, lower=0.1, upper=2.0)
+    r1 = range(model, :γ; lower=0.01, upper=1000.0)
+    r2 = range(model, :σ; lower=0.5, upper=500.0)
     self_tuning_model = TunedModel(
         model=model,
-        tuning=Grid(goal=100),
-        resampling=CV(nfolds=5),
+        tuning=Grid(goal=1000),
+        resampling=StratifiedCV(nfolds=5),
         range=[r1, r2],
-        measure=accuracy,
+        measure=MLJBase.accuracy,
+        # acceleration=CPU1(),
+        acceleration=CPUThreads(),
     )
-    # machine = MLJ.machine(model, X, y)
-    machine = MLJBase.machine(self_tuning_model, X, y)
-    MLJBase.fit!(machine; rows=train)
+    # mach = MLJ.machine(model, X, y)
+    mach = MLJBase.machine(self_tuning_model, X, y)
+    MLJBase.fit!(mach; rows=train)
+    # display(MLJBase.report(mach))
 
-    results = MLJBase.predict(machine; rows=test)
+    results = MLJBase.predict(mach; rows=test)
     acc = MLJBase.accuracy(results, y[test])
     display(acc)
 

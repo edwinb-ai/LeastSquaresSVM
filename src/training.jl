@@ -1,50 +1,63 @@
 function svmtrain(svm::LSSVC, x::AbstractMatrix, y::AbstractVector)
     n = size(y, 1)
+    # @show y
     # Initialize the necessary matrices
-    Ω = build_omega(x, y; kernel=svm.kernel, params=(γ = svm.γ, σ = svm.σ))
+    Ω = build_omega(x, y, svm.σ; kernel=svm.kernel)
+    # @show Ω
     H = Ω + I / svm.γ
+    # @show H
 
     # * Start solving the subproblems
 
     # First, solve for eta
-    η, stats = cg(H, y)
+    (η, stats) = cg_lanczos(H, y)
     # Then, solve for nu
-    ν, stats = cg(H, ones(n))
+    (ν, stats) = cg_lanczos(H, ones(n))
 
     # We then compute s
     s = dot(y, η)
 
     # Finally, we solve the problem for alpha and b
-    b = dot(η, ones(n) / s)
+    b = dot(η, ones(n)) / s
     α = ν .- (η * b)
+    # @show α
 
     return (x, y, α, b)
 end
 
 function svmpredict(svm::LSSVC, fits, xnew::AbstractMatrix)
+    # @show size(xnew, 2)
     result = Vector{eltype(xnew)}(undef, size(xnew, 2))
 
     x, y, α, b = fits
+    # display(size(x))
 
     for i in axes(xnew, 2)
         if svm.kernel == "rbf"
             kern_mat = KernelRBF(x, xnew[:, i], svm.σ)
         end
+        # display(size(kern_mat))
+        # display(size(y))
+        # display(size(α))
         result[i] = sum(@. y * kern_mat * α) + b
     end
 
+    # @show result
     return sign.(result)
 end
 
 function build_omega(
     x::AbstractMatrix,
-    y::AbstractVector;
+    y::AbstractVector,
+    sigma::Float64;
     kernel::String="rbf",
-    params=(γ = 1.0, σ = 2.0),
 )
+    # @show x[:, 1]
+    # @show x[:, 2]
     if kernel == "rbf"
         # Compute using KernelFunctions
-        kern_mat = KernelRBF(x, params.σ)
+        kern_mat = KernelRBF(x, sigma)
+        # @show kern_mat
         # Compute omega matrix
         Ω = (y .* y') .* kern_mat
     end
