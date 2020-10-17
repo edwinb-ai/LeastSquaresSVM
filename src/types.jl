@@ -20,7 +20,15 @@ function KernelRBF(x, gamma)
     return kernel
 end
 
-function KernelRBF(x, y, gamma)
+function KernelRBF(x, y::AbstractMatrix, gamma)
+    dist = SqEuclidean()
+    r = pairwise(dist, x, y, dims=2)
+    kernel = exp.(-r * gamma)
+
+    return kernel
+end
+
+function KernelRBF(x, y::AbstractVector, gamma)
     dist = SqEuclidean()
     r = colwise(dist, x, y)
     kernel = exp.(-r * gamma)
