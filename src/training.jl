@@ -20,7 +20,6 @@ function svmtrain(svm::LSSVC, x::AbstractMatrix, y::AbstractVector)
     # Finally, we solve the problem for alpha and b
     b = dot(η, ones(n)) / s
     α = ν .- (η * b)
-    # @show α
 
     return (x, y, α, b)
 end
@@ -28,34 +27,15 @@ end
 # todo: The problem is here!!!! It turns out that the kernel matrix always
 # gives zeros, which in turn creates this weird fact that makes the classes all # be -1.0
 function svmpredict(svm::LSSVC, fits, xnew::AbstractMatrix)
-    # @show size(xnew, 2)
-    # result = Vector{eltype(xnew)}(undef, size(xnew, 2))
-
     x, y, α, b = fits
-    # display(size(x))
+    # Compute the asymmetric kernel matrix in one go
     if svm.kernel == "rbf"
         kern_mat = KernelRBF(x, xnew, svm.σ)
     end
-    println("Vectorized")
-    @show kern_mat
     result = sum(@. kern_mat * y * α; dims=1) .+ b
-    @show sign.(result)
+    # We need to remove the trailing dimension
+    result = reshape(result, size(result, 2))
 
-    result = Vector{eltype(xnew)}(undef, size(xnew, 2))
-    println("From loop")
-    for i in axes(xnew, 2)
-        if svm.kernel == "rbf"
-            kern_mat = KernelRBF(x, xnew[:, i], svm.σ)
-            # @show kern_mat
-        end
-        # display(size(kern_mat))
-        # display(size(y))
-        # display(size(α))
-        result[i] = sum(@. y * kern_mat * α) + b
-    end
-    @show sign.(result)
-
-    # @show result
     return sign.(result)
 end
 
