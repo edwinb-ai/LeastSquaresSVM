@@ -4,38 +4,38 @@ import Elysivm
 
 # ============== Problem setup ============ #
 headers = [
-	"id", "class",
-	"mean radius", "mean texture",
-	"mean perimeter", "mean area",
-	"mean smoothness", "mean compactness",
-	"mean concavity", "mean concave points",
-	"mean symmetry", "mean fractal dimension",
-	"radius error", "texture error",
-	"perimeter error", "area error",
-	"smoothness error", "compactness error",
-	"concavity error", "concave points error",
-	"symmetry error", "fractal dimension error",
-	"worst radius", "worst texture",
-	"worst perimeter", "worst area",
-	"worst smoothness", "worst compactness",
-	"worst concavity", "worst concave points",
-	"worst symmetry", "worst fractal dimension"
+	"id", "Clump Thickness",
+	"Uniformity of Cell Size", "Uniformity of Cell Shape",
+	"Marginal Adhesion", "Single Epithelial Cell Size",
+	"Bare Nuclei", "Bland Chromatin",
+	"Normal Nucleoli", "Mitoses", "class"
 ]
 
-# Load data into DataFrame
-path = "wdbc.csv"
-data = CSV.File(path; header=headers) |> DataFrame
+path = "wbc.csv"
+# Replace the "?" to `missing`
+data = CSV.File(path; header=headers, missingstring="?") |> DataFrame
 
-# Do not include id's
+# Don't include the id's
 select!(data, Not(:id))
 
-categorical!(data, :class)
+# Change the class tags
+replace!(data.class, 2 => -1)
+replace!(data.class, 4 => 1)
 
-# Split into training and testing sets
+# Transform to categorical
+transform!(data, :class => categorical, renamecols=false)
+
+# We don't need `missing`'s
+data = dropmissing(data)
+
+# Separar los conjuntos de entrenamiento y prueba
 y, X = unpack(data, ==(:class), colname -> true)
+train, test = partition(eachindex(y), 0.67, shuffle=true, rng=11)
 stand1 = Standardizer()
 X = MLJBase.transform(MLJBase.fit!(MLJBase.machine(stand1, X)), X)
-train, test = partition(eachindex(y), 0.8; shuffle=true, rng=11)
+
+# Mostrar estadísticas
+display(describe(X))
 
 @testset "MLJ Integration" begin
     model = Elysivm.LSSVClassifier()
