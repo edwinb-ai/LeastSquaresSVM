@@ -1,14 +1,10 @@
 function svmtrain(svm::LSSVC, x::AbstractMatrix, y::AbstractVector)
     n = size(y, 1)
-    # @show y
     # Initialize the necessary matrices
     Ω = build_omega(x, y, svm.σ; kernel=svm.kernel)
-    # @show Ω
     H = Ω + I / svm.γ
-    # @show H
 
     # * Start solving the subproblems
-
     # First, solve for eta
     (η, stats) = cg_lanczos(H, y)
     # Then, solve for nu
@@ -24,8 +20,6 @@ function svmtrain(svm::LSSVC, x::AbstractMatrix, y::AbstractVector)
     return (x, y, α, b)
 end
 
-# todo: The problem is here!!!! It turns out that the kernel matrix always
-# gives zeros, which in turn creates this weird fact that makes the classes all # be -1.0
 function svmpredict(svm::LSSVC, fits, xnew::AbstractMatrix)
     x, y, α, b = fits
     # Compute the asymmetric kernel matrix in one go
@@ -45,12 +39,9 @@ function build_omega(
     sigma::Float64;
     kernel::String="rbf",
 )
-    # @show x[:, 1]
-    # @show x[:, 2]
     if kernel == "rbf"
         # Compute using KernelFunctions
         kern_mat = KernelRBF(x, sigma)
-        # @show kern_mat
         # Compute omega matrix
         Ω = (y .* y') .* kern_mat
     end
