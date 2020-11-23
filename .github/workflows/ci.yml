@@ -10,10 +10,8 @@ jobs:
       fail-fast: false
       matrix:
         version:
-          - '0.1'
-          - '1.0'
-          - '1.5'
-          - 'nightly'
+          - "1.5"
+          - "nightly"
         os:
           - ubuntu-latest
           - macOS-latest
@@ -53,7 +51,7 @@ jobs:
       - uses: actions/checkout@v2
       - uses: julia-actions/setup-julia@v1
         with:
-          version: '1'
+          version: "1"
       - run: |
           julia --project=docs -e '
             using Pkg
