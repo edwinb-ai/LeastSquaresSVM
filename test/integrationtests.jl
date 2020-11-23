@@ -30,36 +30,23 @@ data = dropmissing(data)
 
 # Separar los conjuntos de entrenamiento y prueba
 y, X = unpack(data, ==(:class), colname -> true)
-train, test = partition(eachindex(y), 0.67, shuffle=true, rng=11)
-stand1 = Standardizer()
+train, test = partition(eachindex(y), 2 / 3, shuffle=true, rng=15)
+stand1 = Standardizer(count=true)
 X = MLJBase.transform(MLJBase.fit!(MLJBase.machine(stand1, X)), X)
 
-# Mostrar estadísticas
-display(describe(X))
 
 @testset "MLJ Integration" begin
-    model = Elysivm.LSSVClassifier()
-    r1 = range(model, :γ; lower=0.0001, upper=0.001)
-    r2 = range(model, :σ; lower=0.0001, upper=0.001)
-    self_tuning_model = TunedModel(
-        model=model,
-        tuning=Grid(goal=500),
-        resampling=StratifiedCV(nfolds=5),
-        range=[r1, r2],
-        measure=MLJBase.accuracy,
-        # acceleration=CPU1(),
-        acceleration=CPUThreads(),
-    )
-    # mach = MLJ.machine(model, X, y)
-    mach = MLJBase.machine(self_tuning_model, X, y)
+    # Define a good set of hyperparameters for this problem
+    model = Elysivm.LSSVClassifier(γ=80.0, σ=0.233333)
+    mach = MLJ.machine(model, X, y)
     MLJBase.fit!(mach, rows=train)
-    # display(report(mach))
-    display(fitted_params(mach).best_model)
 
     results = MLJBase.predict(mach, rows=test)
     acc = MLJBase.accuracy(results, y[test])
     display(acc)
 
-    # Don't test for correctness, test that is works
+    # Test for correctness
     @test isreal(acc)
+    # Test for accuracy, at least 95% for this problem
+    @test acc >= 0.95
 end
