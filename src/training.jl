@@ -16,7 +16,7 @@ Solves a Least Squares Support Vector Classification problem using the Conjugate
 function svmtrain(svm::LSSVC, x::AbstractMatrix, y::AbstractVector)
     n = size(y, 1)
     # Initialize the necessary matrices
-    Ω = build_omega(x, y, svm.σ; kernel=svm.kernel)
+    Ω = build_omega(x, y; sigma=svm.σ, kernel=svm.kernel)
     H = Ω + I / svm.γ
 
     # * Start solving the subproblems
@@ -75,26 +75,27 @@ This matrix contains information about the mapping to a new space using the kern
 # Arguments
 - `x::AbstractMatrix`: The data matrix with the training instances.
 - `y::AbstractVector`: The labels for each of the instances in `x`.
-- `sigma::Float64`: The hyperparameter for the RBF kernel.
 
 # Keywords
 - `kernel::String="rbf"`: The kernel to be used. For now, only the RBF kernel is implemented.
+- `sigma::Float64`: The hyperparameter for the RBF kernel.
 
 # Returns
 - `Ω`: The omega matrix computed as shown above.
 """
 function build_omega(
     x::AbstractMatrix,
-    y::AbstractVector,
-    sigma::Float64;
+    y::AbstractVector;
+    sigma::Float64=1.0,
     kernel::String="rbf",
 )
     if kernel == "rbf"
-        # Compute using KernelFunctions
+        # Compute using own RBF type
         kern_mat = KernelRBF(x, sigma)
-        # Compute omega matrix
-        Ω = (y .* y') .* kern_mat
     end
+
+    # Compute omega matrix
+    Ω = (y .* y') .* kern_mat
 
     return Ω
 end

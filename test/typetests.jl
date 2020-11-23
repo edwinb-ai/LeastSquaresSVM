@@ -22,7 +22,7 @@
     la_omega = @. y * y' * la_kernel
     @test all(loop_omega .== la_omega)
 
-    omega = build_omega(x, y)
+    omega = build_omega(x, y; sigma=2.0)
     @test all(omega .== la_omega)
     @test all(omega .== loop_omega)
 end
