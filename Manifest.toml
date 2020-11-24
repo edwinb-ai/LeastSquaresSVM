@@ -257,9 +257,9 @@ version = "0.14.1"
 
 [[MLJBase]]
 deps = ["CategoricalArrays", "ComputationalResources", "Dates", "DelimitedFiles", "Distributed", "Distributions", "HTTP", "InteractiveUtils", "InvertedIndices", "JLSO", "JSON", "LinearAlgebra", "LossFunctions", "MLJModelInterface", "MLJScientificTypes", "Missings", "OrderedCollections", "Parameters", "PrettyTables", "ProgressMeter", "Random", "Statistics", "StatsBase", "Tables"]
-git-tree-sha1 = "2266c7818f819cd670d1485fc5d5328961caf6ea"
+git-tree-sha1 = "6e2df9c981584c48e199177dc71c0eb48c4ceaf6"
 uuid = "a7f614a8-145f-11e9-1d2a-a57a1082229d"
-version = "0.15.6"
+version = "0.15.7"
 
 [[MLJModelInterface]]
 deps = ["Random", "ScientificTypes"]
@@ -281,9 +281,9 @@ version = "0.3.2"
 
 [[MLJTuning]]
 deps = ["ComputationalResources", "Distributed", "Distributions", "LatinHypercubeSampling", "MLJBase", "MLJModelInterface", "ProgressMeter", "Random", "RecipesBase"]
-git-tree-sha1 = "75bc22ddfe45d497179c42a685ca95e5a6651352"
+git-tree-sha1 = "6f5b30093083a81190a439ae07fdec4b2f2900d2"
 uuid = "03970b2e-30c4-11ea-3135-d1576263f10f"
-version = "0.5.3"
+version = "0.5.4"
 
 [[MacroTools]]
 deps = ["Markdown", "Random"]
