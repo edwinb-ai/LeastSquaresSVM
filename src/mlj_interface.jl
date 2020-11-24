@@ -7,17 +7,16 @@ end
 function MMI.fit(model::LSSVClassifier, verbosity::Int, X, y)
     Xmatrix = MMI.matrix(X; transpose=true) # notice the transpose
     y_plain = convert(Array{eltype(Xmatrix)}, MMI.int(y))
-    new_y = broadcast(x -> x == 2.0 ? -1.0 : 1.0, y_plain)
     decode  = MMI.decoder(y[1]) # for predict method
 
     cache = nothing
 
-    svm = LSSVC(;kernel=model.kernel, γ = model.γ, σ = model.σ)
+    svm = LSSVC(;kernel=model.kernel, γ=model.γ, σ=model.σ)
     fitted = svmtrain(svm, Xmatrix, new_y)
 
     fitresult = (deepcopy(svm), fitted, decode)
 
-    report = (kernel=model.kernel, γ = model.γ, σ = model.σ)
+    report = (kernel = model.kernel, γ = model.γ, σ = model.σ)
 
     return (fitresult, cache, report)
 end
@@ -26,7 +25,6 @@ function MMI.predict(model::LSSVClassifier, fitresult, Xnew)
     Xmatrix = MMI.matrix(Xnew; transpose=true) # notice the transpose
     (svm, fitted, decode) = fitresult
     results = svmpredict(svm, fitted, Xmatrix)
-    results = broadcast(x -> x == -1.0 ? 2.0 : 1.0, results)
     y = convert(Array{UInt64}, results)
 
     return decode(y)

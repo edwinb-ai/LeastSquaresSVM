@@ -33,10 +33,10 @@ LSSVC(; kernel="rbf", γ=1.0, σ=1.0) = LSSVC(kernel, γ, σ)
     KernelRBF
 
 This type is to compute the RBF kernel defined as
-$$
-K(x,y)=\exp{\left( -\vert x - y\vert^2 \gamma \right)}
-$$
-where $\vert x - y\vert$ is the Euclidean norm. This norm is computed with the `Kernels.jl` package.
+
+``K(x,y)=\exp{\left( -\vert x - y\vert^2 \gamma \right)}``
+
+where ``\vert x - y\vert`` is the Euclidean norm. This norm is computed with the `Kernels.jl` package.
 
 # Fields
 - `γ::Real`: The hyperparameter associated with the RBF kernel.

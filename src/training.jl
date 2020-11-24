@@ -62,13 +62,14 @@ function svmpredict(svm::LSSVC, fits, xnew::AbstractMatrix)
 end
 
 @doc raw"""
-    build_omega(x::AbstractMatrix, y::AbstractVector, sigma::Float64; kernel::String="rbf") -> AbstractMatrix
+    build_omega(x::AbstractMatrix, y::AbstractVector, sigma::Float64;
+        kernel::String="rbf") -> AbstractMatrix
 
 It builds a matrix, known as the "omega matrix", that contains the following information
-$$
-\Omega_{kl} = y_k y_l K(x_k,x_l)
-$$
-with $k,l=1,\dots,N$, and $N$ being the length of `x`. In other words, the number of training instances.
+
+``\Omega_{kl} = y_{k} y_{l} K(x_{k}, x_{l})``
+
+with ``k,l=1,\dots,N``, and ``N`` being the length of `x`. In other words, the number of training instances.
 
 This matrix contains information about the mapping to a new space using the kernel. It is exclusively used in the training step of the learning procedure.
 
