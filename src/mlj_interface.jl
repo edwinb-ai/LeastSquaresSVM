@@ -12,7 +12,7 @@ function MMI.fit(model::LSSVClassifier, verbosity::Int, X, y)
     cache = nothing
 
     svm = LSSVC(;kernel=model.kernel, γ=model.γ, σ=model.σ)
-    fitted = svmtrain(svm, Xmatrix, new_y)
+    fitted = svmtrain(svm, Xmatrix, y_plain)
 
     fitresult = (deepcopy(svm), fitted, decode)
 
