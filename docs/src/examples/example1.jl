@@ -51,11 +51,6 @@ select!(data, Not(:id));
 # We also need to remove all the missing data from the `DataFrame`
 data = dropmissing(data);
 
-# We need to encode the classes correctly. This implementation expects that both classes
-# are either a `1` or a `-1`, so we replace them here.
-replace!(data.class, 2 => -1);
-replace!(data.class, 4 => 1);
-
 # The `class` column should be of type `categorical`, following the `MLJ` API, so we
 # encode it here.
 transform!(data, :class => categorical, renamecols=false);
