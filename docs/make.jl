@@ -21,11 +21,11 @@ map(lit_to_md, files)
 makedocs(;
     modules=[Elysivm],
     authors="Edwin Bedolla",
-    repo="https://github.com/edwinb-ai/Elysivm.jl/blob/{commit}{path}#L{line}",
-    sitename="Elysivm.jl",
+    repo="https://github.com/edwinb-ai/Elysivm/blob/{commit}{path}#L{line}",
+    sitename="Elysivm",
     format=Documenter.HTML(;
         prettyurls=get(ENV, "CI", "false") == "true",
-        canonical="https://edwinb-ai.github.io/Elysivm.jl",
+        canonical="https://edwinb-ai.github.io/Elysivm",
         assets=String[],
     ),
     pages=[
