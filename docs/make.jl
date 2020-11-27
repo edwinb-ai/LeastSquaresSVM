@@ -36,5 +36,5 @@ makedocs(;
 )
 
 deploydocs(;
-    repo="github.com/edwinb-ai/Elysivm.jl.git",
+    repo="github.com/edwinb-ai/Elysivm.git",
 )
