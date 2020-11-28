@@ -14,6 +14,6 @@ include("training.jl")
 export svmtrain, build_omega, svmpredict
 
 include("mlj_interface.jl")
-export LSSVClassifier
+export LSSVClassifier, LSSVRegressor
 
 end
