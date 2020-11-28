@@ -25,7 +25,7 @@ makedocs(;
     sitename="Elysivm",
     format=Documenter.HTML(;
         prettyurls=get(ENV, "CI", "false") == "true",
-        canonical="https://edwinb-ai.github.io/Elysivm",
+        canonical="https://edwinb-ai.github.io/Elysivm/dev",
         assets=String[],
     ),
     pages=[
@@ -37,5 +37,6 @@ makedocs(;
 
 deploydocs(;
     repo="github.com/edwinb-ai/Elysivm.git",
-    devbranch="main",
+    target="build",
+    push_preview=true,
 )
