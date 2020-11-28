@@ -37,4 +37,5 @@ makedocs(;
 
 deploydocs(;
     repo="github.com/edwinb-ai/Elysivm.git",
+    devbranch="main",
 )
