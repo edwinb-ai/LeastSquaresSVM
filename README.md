@@ -1,7 +1,7 @@
 # Elysivm
 
-[![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://edwinb-ai.github.io/Elysivm.jl/stable)
-[![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://edwinb-ai.github.io/Elysivm.jl/dev)
+[![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://edwinb-ai.github.io/Elysivm/stable)
+[![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://edwinb-ai.github.io/Elysivm/dev)
 [![CI](https://github.com/edwinb-ai/Elysivm/workflows/CI/badge.svg)](https://github.com/edwinb-ai/Elysivm/actions?query=workflow%3ACI)
 [![codecov](https://codecov.io/gh/edwinb-ai/Elysivm/branch/main/graph/badge.svg?token=U0HVBJ0ks7)](https://codecov.io/gh/edwinb-ai/Elysivm)
 
