@@ -72,7 +72,7 @@ Solves a Least Squares Support Vector Regression problem using the Conjugate Gra
 - `y::AbstractVector`: A vector that contains the classes. It is expected that there are only two classes, -1 and 1.
 
 # Returns
-- `Tuple`: A tuple containing `x`, `y` and the following two elements:
+- `Tuple`: A tuple containing `x` and the following two elements:
     - `b`: Contains the bias for the decision function.
     - `α`: Contains the weights for the decision function.
 """
