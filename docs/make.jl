@@ -3,7 +3,7 @@ using Documenter
 using Literate
 
 # ! Convert scripts to markdown using Literate
-files = ["example1.jl"]
+files = ["example1.jl", "example2.jl"]
 
 function lit_to_md(file)
     examples_path = joinpath(@__DIR__, "src", "examples")
@@ -30,8 +30,12 @@ makedocs(;
     ),
     pages=[
         "Home" => "index.md",
+        "Examples" => [
+            "example1.md",
+            "example2.md",
+        ],
         "Reference" => "reference.md",
-        "Examples" => "example1.md",
+
     ],
 )
 

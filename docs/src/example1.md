@@ -2,9 +2,9 @@
 EditURL = "<unknown>/src/examples/example1.jl"
 ```
 
-# Example: Case study
+# Classification of the Wisconsin breast cancer dataset
 
-In this case study we will deal with the Wisconsin breat cancer dataset which can be
+In this case study we will deal with the Wisconsin breast cancer dataset which can be
 browsed freely on the [UCI website](https://archive.ics.uci.edu/ml/datasets/Breast+Cancer+Wisconsin+(Diagnostic)).
 
 In particular, this dataset contains *10 features* and 699 instances. In the work we
@@ -80,15 +80,6 @@ We also need to remove all the missing data from the `DataFrame`
 
 ```@example example1
 data = dropmissing(data);
-nothing #hide
-```
-
-We need to encode the classes correctly. This implementation expects that both classes
-are either a `1` or a `-1`, so we replace them here.
-
-```@example example1
-replace!(data.class, 2 => -1);
-replace!(data.class, 4 => 1);
 nothing #hide
 ```
 

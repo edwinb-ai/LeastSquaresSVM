@@ -1,6 +1,6 @@
-# # Example: Case study
+# # Classification of the Wisconsin breast cancer dataset
 #
-# In this case study we will deal with the Wisconsin breat cancer dataset which can be
+# In this case study we will deal with the Wisconsin breast cancer dataset which can be
 # browsed freely on the [UCI website](https://archive.ics.uci.edu/ml/datasets/Breast+Cancer+Wisconsin+(Diagnostic)).
 #
 # In particular, this dataset contains *10 features* and 699 instances. In the work we
