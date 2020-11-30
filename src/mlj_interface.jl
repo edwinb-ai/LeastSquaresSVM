@@ -72,3 +72,36 @@ function MMI.predict(model::LSSVRegressor, fitresult, Xnew)
 
     return results
 end
+
+
+##
+## Metadata
+##
+
+# shared metadata
+const LSSVM = (LSSVC, LSSVR)
+
+MMI.metadata_pkg.(LSSVM,
+    name = "Elysivm",
+    uuid = "6bfd0e71-701c-47cd-9c90-5bf8fe84640d",
+    url="https://github.com/edwinb-ai/Elysivm",
+    julia=true,
+    license="MIT",
+    is_wrapper=false
+)
+
+MMI.metadata_model(LSSVC,
+    input=MMI.Table(MMI.Continuous),
+    target=AbstractVector{MMI.Finite},
+    weights=false,
+    descr="A Least Squares Support Vector Classifier implementation.",
+    path="Elysivm.LSSVC",
+)
+
+MMI.metadata_model(LSSVR,
+    input=MMI.Table(MMI.Continuous),
+    target=AbstractVector{MMI.Continuous},
+    weights=false,
+    descr="A Least Squares Support Vector Regressor implementation.",
+    path="Elysivm.LSSVR",
+)
