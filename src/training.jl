@@ -152,12 +152,23 @@ This matrix contains information about the mapping to a new space using the kern
 function _build_omega(
     x::AbstractMatrix,
     y::AbstractVector;
-    sigma::Float64=1.0,
     kernel::String="rbf",
+    sigma::Float64=1.0,
+    degree::Int=0
 )
+    kern_mat = Matrix{eltype(x)}(undef, size(x))
+
     if kernel == "rbf"
-        # Compute using own RBF type
-        kern_mat = KernelRBF(x, sigma)
+        # Create the kernel with the corresponding scale
+        t = ScaleTransform(revert(sigma))
+        κ = transform(SqExponentialKernel(), t)
+        kernelmatrix!(kern_mat, κ, x)
+    elseif kernel == "linear"
+        κ = LinearKernel()
+        kernelmatrix!(kern_mat, κ, x)
+    elseif kernel == "poly"
+        κ = PolynomialKernel(; degree=degree)
+        kernelmatrix!(kern_mat, κ, x)
     end
 
     # Compute omega matrix

@@ -25,11 +25,12 @@ The type to hold a Least Squares Support Vector Classifier.
 """
 mutable struct LSSVC <: SVM
     kernel::String
-    γ::Float64
-    σ::Float64
+    γ::AbstractFloat
+    σ::AbstractFloat
+    degree::Int
 end
 
-LSSVC(; kernel="rbf", γ=1.0, σ=1.0) = LSSVC(kernel, γ, σ)
+LSSVC(; kernel="rbf", γ=1.0, σ=1.0, degree::Int=0) = LSSVC(kernel, γ, σ, degree)
 
 """
     LSSVR()
@@ -51,6 +52,7 @@ mutable struct LSSVR <: SVM
     kernel::String
     γ::Float64
     σ::Float64
+    degree::Int
 end
 
-LSSVR(; kernel="rbf", γ=1.0, σ=1.0) = LSSVR(kernel, γ, σ)
+LSSVR(; kernel="rbf", γ=1.0, σ=1.0, degree::Int=0) = LSSVR(kernel, γ, σ, degree)
