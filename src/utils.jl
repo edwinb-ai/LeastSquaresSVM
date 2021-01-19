@@ -29,9 +29,6 @@ The matrix is built using the `kernelmatrix!` functions from `KernelFunctions.jl
 - `kern_mat`: The kernel matrix.
 """
 function _build_kernel_matrix(x; kwargs...)
-    # Build the result matrix
-    # kern_mat = similar(x)
-
     # Extract the matrix for the keyword arguments
     kernel = kwargs[:kernel]
 
@@ -55,11 +52,6 @@ end
 function _build_kernel_matrix(x, y; kwargs...)
     # Check that the first dimension is the same
     @assert size(x, 1) == size(y, 1)
-
-    # Extract the second dimension to build the result matrix
-    # n = size(x, 2)
-    # m = size(y, 2)
-    # kern_mat = Matrix{eltype(x)}(undef, n, m)
 
     # Extract the matrix for the keyword arguments
     kernel = kwargs[:kernel]
