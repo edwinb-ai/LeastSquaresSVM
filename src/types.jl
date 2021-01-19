@@ -1,5 +1,3 @@
-revert(x) = sqrt(2.0 * x)
-
 """
     SVM
 
