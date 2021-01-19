@@ -6,12 +6,14 @@ MMI.@mlj_model mutable struct LSSVClassifier <: MMI.Deterministic
     kernel::String = "rbf"
     γ::Float64 = 1.0::(_ > 0.0)
     σ::Float64 = 1.0::(_ > 0.0)
+    degree::Int = 0::(_ >= 0)
 end
 
 MMI.@mlj_model mutable struct LSSVRegressor <: MMI.Deterministic
     kernel::String = "rbf"
     γ::Float64 = 1.0::(_ > 0.0)
     σ::Float64 = 1.0::(_ > 0.0)
+    degree::Int = 0::(_ >= 0)
 end
 
 ##
@@ -41,7 +43,7 @@ function MMI.fit(model::LSSVRegressor, verbosity::Int, X, y)
 
     cache = nothing
 
-    svr = LSSVR(;kernel=model.kernel, γ=model.γ, σ=model.σ)
+    svr = LSSVR(; kernel=model.kernel, γ=model.γ, σ=model.σ)
     fitted = svmtrain(svr, Xmatrix, y)
 
     fitresult = (deepcopy(svr), fitted)
@@ -82,13 +84,12 @@ end
 const LSSVM = (LSSVC, LSSVR)
 
 MMI.metadata_pkg.(LSSVM,
-    name = "Elysivm",
-    uuid = "6bfd0e71-701c-47cd-9c90-5bf8fe84640d",
+    name="Elysivm",
+    uuid="6bfd0e71-701c-47cd-9c90-5bf8fe84640d",
     url="https://github.com/edwinb-ai/Elysivm",
     julia=true,
     license="MIT",
-    is_wrapper=false
-)
+    is_wrapper=false)
 
 MMI.metadata_model(LSSVC,
     input=MMI.Table(MMI.Continuous),
