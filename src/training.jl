@@ -149,7 +149,7 @@ This matrix contains information about the mapping to a new space using the kern
 # Returns
 - `Ω`: The omega matrix computed as shown above.
 """
-function build_omega(
+function _build_omega(
     x::AbstractMatrix,
     y::AbstractVector;
     sigma::Float64=1.0,

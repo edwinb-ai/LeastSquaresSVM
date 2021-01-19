@@ -1,3 +1,5 @@
+revert(x) = sqrt(2.0 * x)
+
 """
     SVM
 
@@ -48,59 +50,7 @@ The type to hold a Least Squares Support Vector Regressor.
 mutable struct LSSVR <: SVM
     kernel::String
     γ::Float64
-σ::Float64
+    σ::Float64
 end
 
 LSSVR(; kernel="rbf", γ=1.0, σ=1.0) = LSSVR(kernel, γ, σ)
-
-@doc raw"""
-    KernelRBF
-
-This type is to compute the RBF kernel defined as
-
-``K(x,y)=\exp{\left( -\vert x - y\vert^2 \gamma \right)}``
-
-where ``\vert x - y\vert`` is the Euclidean norm. This norm is computed with the `Kernels.jl` package.
-
-# Fields
-- `γ::Real`: The hyperparameter associated with the RBF kernel.
-"""
-mutable struct KernelRBF
-    γ::Real
-end
-
-"""
-    KernelRBF(x::AbstractMatrix, gamma::Float64)
-    KernelRBF(x, y::AbstractMatrix, gamma::Float64)
-    KernelRBF(x, y::AbstractVector, gamma::Float64)
-
-Depending on the arguments, it computes either a pairwise RBF kernel (if it is only with one matrix), or a pairwise RBF kernel between a matrix and an array.
-
-# Arguments
-- `x::AbstractMatrix`: A two-row matrix.
-- `y::AbstractVector`: A one dimensional array.
-- `gamma::Float64`: The hyperparameter needed to compute the kernel.
-"""
-function KernelRBF(x::AbstractMatrix, gamma::Float64)
-    dist = SqEuclidean()
-    r = pairwise(dist, x, dims=2)
-    kernel = exp.(-r * gamma)
-
-    return kernel
-end
-
-function KernelRBF(x, y::AbstractMatrix, gamma::Float64)
-    dist = SqEuclidean()
-    r = pairwise(dist, x, y, dims=2)
-    kernel = exp.(-r * gamma)
-
-    return kernel
-end
-
-function KernelRBF(x, y::AbstractVector, gamma::Float64)
-    dist = SqEuclidean()
-    r = colwise(dist, x, y)
-    kernel = exp.(-r * gamma)
-
-    return kernel
-end

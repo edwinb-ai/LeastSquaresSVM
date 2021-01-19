@@ -1,7 +1,7 @@
 module Elysivm
 
 using LinearAlgebra
-using Distances
+using KernelFunctions
 using Krylov
 import MLJModelInterface
 
@@ -11,7 +11,7 @@ include("types.jl")
 export LSSVC, LSSVR, KernelRBF
 
 include("training.jl")
-export svmtrain, build_omega, svmpredict
+export svmtrain, svmpredict
 
 include("mlj_interface.jl")
 export LSSVClassifier, LSSVRegressor
