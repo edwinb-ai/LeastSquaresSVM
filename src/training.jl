@@ -16,7 +16,9 @@ Solves a Least Squares Support Vector Classification problem using the Conjugate
 function svmtrain(svm::LSSVC, x::AbstractMatrix, y::AbstractVector)
     n = size(y, 1)
     # Initialize the necessary matrices
-    Ω = build_omega(x, y; sigma=svm.σ, kernel=svm.kernel, degree=svm.degree)
+    kwargs = Dict(:kernel => svm.kernel, :sigma => svm.σ, :degree => svm.degree)
+    kern_mat = _build_kernel_matrix(x; kwargs...)
+    Ω = (y .* y') .* kern_mat
     H = Ω + I / svm.γ
 
     # * Start solving the subproblems
@@ -51,7 +53,8 @@ Uses the information obtained from `svmtrain` such as the bias and weights to co
 function svmpredict(svm::LSSVC, fits, xnew::AbstractMatrix)
     x, y, α, b = fits
     kwargs = Dict(:kernel => svm.kernel, :sigma => svm.σ, :degree => svm.degree)
-    kern_mat = _build_kernel_matrix(x, xnew; kwargs)
+    @assert size(x, 1) == size(xnew, 1)
+    kern_mat = _build_kernel_matrix(x, xnew; kwargs...)
     result = sum(@. kern_mat * y * α; dims=1) .+ b
     # We need to remove the trailing dimension
     result = reshape(result, size(result, 2))
@@ -150,11 +153,9 @@ This matrix contains information about the mapping to a new space using the kern
 function _build_omega(
     x::AbstractMatrix,
     y::AbstractVector;
-    kernel::String="rbf",
-    sigma::Float64=1.0,
-    degree::Int=0
+    kwargs...
 )
-    kern_mat = _build_kernel_matrix(x, kernel)
+    kern_mat = _build_kernel_matrix(x, kernel; kwargs...)
 
     # Compute omega matrix
     Ω = (y .* y') .* kern_mat
@@ -162,7 +163,7 @@ function _build_omega(
     return Ω
 end
 
-function _build_kernel_matrix(x, kernel; kwargs...)
+function _build_kernel_matrix(x; kwargs...)
     kern_mat = Matrix{eltype(x)}(undef, size(x))
     kernel = kwargs[:kernel]
 
@@ -182,8 +183,10 @@ function _build_kernel_matrix(x, kernel; kwargs...)
     return kern_mat
 end
 
-function _build_kernel_matrix(x, y, kernel; kwargs...)
-    kern_mat = Matrix{eltype(x)}(undef, size(x))
+function _build_kernel_matrix(x, y; kwargs...)
+    n = size(x, 2)
+    m = size(y, 2)
+    kern_mat = Matrix{eltype(x)}(undef, n, m)
     kernel = kwargs[:kernel]
 
     if kernel == "rbf"
