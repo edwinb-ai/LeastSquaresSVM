@@ -7,7 +7,7 @@ import MLJModelInterface
 
 const MMI = MLJModelInterface
 
-export LSSVC, LSSVR, KernelRBF
+export SVM, LSSVC, LSSVR, KernelRBF
 export svmtrain, svmpredict
 export LSSVClassifier, LSSVRegressor
 
