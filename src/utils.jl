@@ -18,14 +18,15 @@ The matrix is built using the `kernelmatrix!` functions from `KernelFunctions.jl
 
 # Arguments
 - `x::AbstractMatrix`: The data matrix with the training instances.
-- `y::AbstractMatrix`: The labels for each of the instances in `x`.
+- `y::AbstractMatrix`: Another data matrix, normally used for the prediction step in the classification implementation.
 
 # Keywords
-- `kernel::String="rbf"`: The kernel to be used. For now, only the RBF kernel is implemented.
+- `kernel::String="rbf"`: The kernel to be used. The available options are "rbf" for a RBF type kernel; "linear", for a classic linear kernel; and "poly" for a polynomial kernel.
 - `sigma::Float64`: The hyperparameter for the RBF kernel.
+- `degree::Float64`: The degree of the polynomial kernel if "poly" is chosen.
 
 # Returns
-- `Ω`: The omega matrix computed as shown above.
+- `kern_mat`: The kernel matrix.
 """
 function _build_kernel_matrix(x; kwargs...)
     # Build the result matrix
