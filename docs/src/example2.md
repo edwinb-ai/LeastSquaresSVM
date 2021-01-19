@@ -1,5 +1,5 @@
 ```@meta
-EditURL = "<unknown>/src/examples/example2.jl"
+EditURL = "<unknown>/docs/src/examples/example2.jl"
 ```
 
 # Regression on a synthetic dataset

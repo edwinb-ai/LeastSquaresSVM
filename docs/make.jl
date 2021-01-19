@@ -6,8 +6,8 @@ using Literate
 files = ["example1.jl", "example2.jl"]
 
 function lit_to_md(file)
-    examples_path = joinpath(@__DIR__, "src", "examples")
-    out_md_path = "src"
+    examples_path = joinpath("docs", "src", "examples")
+    out_md_path = joinpath("docs", "src")
     Literate.markdown(
         joinpath(examples_path, file),
         out_md_path;
