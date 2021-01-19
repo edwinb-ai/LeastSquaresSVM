@@ -26,7 +26,7 @@ makedocs(;
     format=Documenter.HTML(;
         prettyurls=get(ENV, "CI", "false") == "true",
         canonical="https://edwinb-ai.github.io/Elysivm/stable/",
-        assets=String[],
+        assets=String[]
     ),
     pages=[
         "Home" => "index.md",
@@ -35,12 +35,11 @@ makedocs(;
             "example2.md",
         ],
         "Reference" => "reference.md",
-
-    ],
+    ]
 )
 
 deploydocs(;
     repo="github.com/edwinb-ai/Elysivm.git",
     devbranch="main",
-    push_preview=true,
+    push_preview=true
 )
