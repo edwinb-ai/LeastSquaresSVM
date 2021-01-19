@@ -42,7 +42,7 @@ function _build_kernel_matrix(x; kwargs...)
         kern_mat = kernelmatrix(κ, x)
     elseif kernel == "poly"
         # Create the kernel with the corresponding degree
-        κ = PolynomialKernel(kwargs[:degree], 0.0)
+        κ = PolynomialKernel(; degree=kwargs[:degree], c=0.0)
         kern_mat = kernelmatrix(κ, x)
     end
 
@@ -66,7 +66,7 @@ function _build_kernel_matrix(x, y; kwargs...)
         kern_mat = kernelmatrix(κ, x, y)
     elseif kernel == "poly"
         # Create the kernel with the corresponding degree
-        κ = PolynomialKernel(kwargs[:degree], 0.0)
+        κ = PolynomialKernel(; degree=kwargs[:degree], c=0.0)
         kern_mat = kernelmatrix(κ, x, y)
     end
 
