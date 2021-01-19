@@ -28,17 +28,17 @@
     @test all(result .== true_result)
 end
 
-# @testset "Regression" begin
-#     # * Setup the problem
-#     X_train = [[0.0, 0.0] [2.0, 2.0]]
-#     y = [0.5, 2.5]
-#     svr = LSSVR()
-#     fitted = svmtrain(svr, X_train, y)
+@testset "Regression" begin
+    # * Setup the problem
+    X_train = [[0.0, 0.0] [2.0, 2.0]]
+    y = [0.5, 2.5]
+    svr = LSSVR()
+    fitted = svmtrain(svr, X_train, y)
 
-#     # Create some testing data
-#     X_test = [1.0, 1.0]
-#     X_test = reshape(X_test, 2, :)
-#     y_test = [1.5]
-#     result = svmpredict(svr, fitted, X_test)
-#     @test isapprox(result, y_test)
-# end
+    # Create some testing data
+    X_test = [1.0, 1.0]
+    X_test = reshape(X_test, 2, :)
+    y_test = [1.5]
+    result = svmpredict(svr, fitted, X_test)
+    @test isapprox(result, y_test)
+end

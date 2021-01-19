@@ -80,11 +80,11 @@ Solves a Least Squares Support Vector Regression problem using the Conjugate Gra
 """
 function svmtrain(svm::LSSVR, x::AbstractMatrix, y::AbstractVector)
     n = size(y, 1)
-    # Here, the omega matrix is just the kernel matrix
-    if svm.kernel == "rbf"
-        Ω = KernelRBF(x, svm.σ)
-    end
-    H = Ω + I / svm.γ
+    # Specify the keyword arguments
+    kwargs = Dict(:kernel => svm.kernel, :sigma => svm.σ, :degree => svm.degree)
+    # We build the kernel matrix and the omega matrix
+    kern_mat = _build_kernel_matrix(x; kwargs...)
+    H = kern_mat + I / svm.γ
 
     # * Start solving the subproblems
     # First, solve for eta
@@ -118,9 +118,9 @@ Uses the information obtained from `svmtrain` such as the bias and weights to co
 function svmpredict(svm::LSSVR, fits, xnew::AbstractMatrix)
     x, α, b = fits
     # Compute the asymmetric kernel matrix in one go
-    if svm.kernel == "rbf"
-        kern_mat = KernelRBF(x, xnew, svm.σ)
-    end
+    kwargs = Dict(:kernel => svm.kernel, :sigma => svm.σ, :degree => svm.degree)
+    @assert size(x, 1) == size(xnew, 1)
+    kern_mat = _build_kernel_matrix(x, xnew; kwargs...)
     result = sum(kern_mat .* α; dims=1) .+ b
     # We need to remove the trailing dimension
     result = reshape(result, size(result, 2))
