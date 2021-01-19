@@ -16,7 +16,7 @@ Solves a Least Squares Support Vector Classification problem using the Conjugate
 function svmtrain(svm::LSSVC, x::AbstractMatrix, y::AbstractVector)
     n = size(y, 1)
     # Initialize the necessary matrices
-    Ω = build_omega(x, y; sigma=svm.σ, kernel=svm.kernel)
+    Ω = build_omega(x, y; sigma=svm.σ, kernel=svm.kernel, degree=svm.degree)
     H = Ω + I / svm.γ
 
     # * Start solving the subproblems
@@ -50,10 +50,8 @@ Uses the information obtained from `svmtrain` such as the bias and weights to co
 """
 function svmpredict(svm::LSSVC, fits, xnew::AbstractMatrix)
     x, y, α, b = fits
-    # Compute the asymmetric kernel matrix in one go
-    if svm.kernel == "rbf"
-        kern_mat = KernelRBF(x, xnew, svm.σ)
-    end
+    kwargs = Dict(:kernel => svm.kernel, :sigma => svm.σ, :degree => svm.degree)
+    kern_mat = _build_kernel_matrix(x, xnew; kwargs)
     result = sum(@. kern_mat * y * α; dims=1) .+ b
     # We need to remove the trailing dimension
     result = reshape(result, size(result, 2))
@@ -156,23 +154,50 @@ function _build_omega(
     sigma::Float64=1.0,
     degree::Int=0
 )
+    kern_mat = _build_kernel_matrix(x, kernel)
+
+    # Compute omega matrix
+    Ω = (y .* y') .* kern_mat
+
+    return Ω
+end
+
+function _build_kernel_matrix(x, kernel; kwargs...)
     kern_mat = Matrix{eltype(x)}(undef, size(x))
+    kernel = kwargs[:kernel]
 
     if kernel == "rbf"
         # Create the kernel with the corresponding scale
-        t = ScaleTransform(revert(sigma))
+        t = ScaleTransform(revert(kwargs[:sigma]))
         κ = transform(SqExponentialKernel(), t)
         kernelmatrix!(kern_mat, κ, x)
     elseif kernel == "linear"
         κ = LinearKernel()
         kernelmatrix!(kern_mat, κ, x)
     elseif kernel == "poly"
-        κ = PolynomialKernel(; degree=degree)
+        κ = PolynomialKernel(kwargs[:degree], 0.0)
         kernelmatrix!(kern_mat, κ, x)
     end
 
-    # Compute omega matrix
-    Ω = (y .* y') .* kern_mat
+    return kern_mat
+end
 
-    return Ω
+function _build_kernel_matrix(x, y, kernel; kwargs...)
+    kern_mat = Matrix{eltype(x)}(undef, size(x))
+    kernel = kwargs[:kernel]
+
+    if kernel == "rbf"
+        # Create the kernel with the corresponding scale
+        t = ScaleTransform(revert(kwargs[:sigma]))
+        κ = transform(SqExponentialKernel(), t)
+        kernelmatrix!(kern_mat, κ, x, y)
+    elseif kernel == "linear"
+        κ = LinearKernel()
+        kernelmatrix!(kern_mat, κ, x, y)
+    elseif kernel == "poly"
+        κ = PolynomialKernel(kwargs[:degree], 0.0)
+        kernelmatrix!(kern_mat, κ, x, y)
+    end
+
+    return kern_mat
 end
