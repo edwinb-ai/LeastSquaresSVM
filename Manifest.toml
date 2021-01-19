@@ -258,6 +258,12 @@ git-tree-sha1 = "d703a857d22df99caa0c923b7fcea1419169b5ab"
 uuid = "5c8ed15e-5a4c-59e4-a42b-c7e8811fb125"
 version = "1.2.0"
 
+[[Literate]]
+deps = ["Base64", "JSON", "REPL"]
+git-tree-sha1 = "32b517d4d8219d3bbab199de3416ace45010bdb3"
+uuid = "98b081ad-f1c9-55d3-8b20-4c87d4299306"
+version = "2.8.0"
+
 [[Logging]]
 uuid = "56ddb016-857b-54e1-b83d-db4d58db5568"
 
