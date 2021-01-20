@@ -55,7 +55,7 @@ end
     # * Setup the problem
     x = [[0.0, 0.0] [1.0, 1.0]]
     y = [-1.0, 1.0]
-    kernels = Dict("linear" => 1, "poly" => 2)
+    kernels = Dict(:linear => 1, :poly => 2)
 
     x_test = [2.0, 2.0]
     x_test = reshape(x_test, 2, :)
