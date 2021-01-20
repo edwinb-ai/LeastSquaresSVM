@@ -14,13 +14,23 @@ using Plots
 gr();
 rng = MersenneTwister(812);
 
-# For this example, we will create a very large classification problem. It is actually
+# For this example, we will create a large classification problem. It is actually
 # inspired from a similar classification problem from [`scikit-learn`](https://scikit-learn.org/stable/auto_examples/svm/plot_separating_hyperplane_unbalanced.html#sphx-glr-auto-examples-svm-plot-separating-hyperplane-unbalanced-py).
 #
-# The idea is to have a very large number of samples (10_000), and a large number of
-# features (20).
+# The idea is to have a very large number of features (5000), and a small number of
+# instances.
+# This has been [reported](https://www.csie.ntu.edu.tw/~cjlin/papers/guide/guide.pdf) as
+# as being a good use case or rule of thumb
+#
+# > Whenever the number of features is _larger_ than the number of instances, use a
+# > linear kernel.
+#
 X, y = MLJ.make_blobs(500, 2_000; centers=2, cluster_std=[1.5, 0.5])
 
+# Of course, this is just to showcase the implementation within `Elysivm`. There are
+# actually better ways to handle this kind of problem, e.g. dimensionality-reduction
+# algorithms.
+#
 # The `make_blobs` function is very similar to that of [`scikit-learn`s](https://scikit-learn.org/stable/modules/generated/sklearn.datasets.make_blobs.html#sklearn.datasets.make_blobs).
 # The idea is to create circles, or clusters, and to classify between them.
 #
@@ -64,12 +74,15 @@ describe(X |> DataFrame, :mean, :std, :eltype)
 # \text{accuracy} = \frac{\text{number of correct predictions}}{\text{total number of predictions}}
 # ```
 #
+# Note that the accuracy is not always a good measure of classification, but it will do
+# fine on this dataset.
+#
 # !!! warning
 #     Remember that the least-squares formulation uses **all** the data samples, so the
-#     following will actually consume at least > 8 GB of RAM. Do not run this on your
+#     following will actually consume at least > 6 GB of RAM. Do not run this on your
 #     hardware if you are not sure you have this kind of resources available.
 #     At the very least, replace `CPUThreads()` with `CPU1()` to disable multithreading.
-#     Better methods to handle memory more efficiently will be available in future
+#     Methods to handle memory more efficiently will be available in future
 #     versions.
 #
 model = LSSVClassifier(kernel="linear");
@@ -85,7 +98,7 @@ self_tuning_model = TunedModel(
 
 # And now we proceed to train all the models and find the best one!
 mach = machine(self_tuning_model, X, y);
-fit!(mach, rows=train, verbosity=1);
+fit!(mach, rows=train, verbosity=0);
 fitted_params(mach).best_model
 
 # Having found the best hyperparameters for the regressor model we proceed to check how the
@@ -94,18 +107,31 @@ ŷ = MLJBase.predict(mach, rows=test);
 result = accuracy(ŷ, y[test])
 @show result # Check the result
 
-# We can see that we did quite well. A value of 1, or close enough, is very good.
+# We can see that we did quite well. A value of 1, or close enough, means the classifier
+# is _perfect._ That is, it can classify correctly between each class.
 #
-# We can also see a plot of the predicted and true values.
-# The closer these dots are to the diagonal means that the model performed well.
-# scatter(ŷ, y[test], markersize=9)
-# r = range(minimum(y[test]), maximum(y[test]); length=length(test))
-# plot!(r, r, linewidth=9)
-# plot!(size=(3000, 2100))
+# Finally, let us look at the so-called _confusion matrix._ This table shows us useful
+# information about the performance of our classifier.
+#
+# Let us compute it first, and then we'll analyse it. Notice, however, that we need to
+# first coerce the types to `OrderedFactor` _scitypes_ in order for the confusion matrix
+# to be computed correctly.
+ŷ = coerce(ŷ, OrderedFactor);
+y_ordered = coerce(y[test], OrderedFactor);
+confusion_matrix(ŷ, y_ordered)
 
-# We can actually see that we are not that far off, maybe a little more search could
-# definitely improve the performance of our model.
-ŷ = coerce(ŷ, OrderedFactor)
-y_ordered = coerce(y[test], OrderedFactor)
-cm = MLJBase.confusion_matrix(ŷ, y_ordered)
-display(cm)
+# The way you read the confusion matrix is the following. The main diagonal tells us how
+# many correct predictions were obtained by the classifier for both classes.
+# On the other hand, the other values are the following
+#
+# - The _upper right_ value is known as the **false positive**. This is the number of instances that were classified as belonging to a given class, when actually they were instances of the other one. An example would be if we had an instance ``x_1`` which belonged to the class `b`, but the classifier would have predicted it actually belonged to class `a`.
+# - The _lower left_ value is known as the **false negative**. This is the number of instances classified as _not_ belonging to a given class, when they actually belonged to a class. An example would be if we had an instance ``x_2`` which belonged to class `a`, and the classifier actually predicted it belonged to class `b`.
+#
+# It might be a little bit confusing, so a good starting point for more information on the
+# subject is the excellent [Wikipedia article.](https://en.wikipedia.org/wiki/Confusion_matrix)
+# You might also be interested in the following [document](https://developers.google.com/machine-learning/crash-course/classification/accuracy) from a Google's Machine Learning Crash Course.
+#
+# In this case, we can see that no false negative or positive values were found, which
+# means that the classifier did outstandingly good.
+# Normally, we can expect to have at least some percentage of false negative or positives.
+#
