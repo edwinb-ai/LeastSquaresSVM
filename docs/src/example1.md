@@ -30,7 +30,7 @@ We then need to specify a seed to enable reproducibility of the results.
 
 ```julia
 rng = MersenneTwister(801239);
-
+nothing #hide
 ```
 
 Here we are creating a list with all the headers.
@@ -43,14 +43,14 @@ headers = [
 	"Bare Nuclei", "Bland Chromatin",
 	"Normal Nucleoli", "Mitoses", "class"
 ];
-
+nothing #hide
 ```
 
 We define the path were the dataset is located
 
 ```julia
 path = joinpath("src", "examples", "wbc.csv");
-
+nothing #hide
 ```
 
 We load the csv file and convert it to a `DataFrame`. Note that we are specifying
@@ -59,7 +59,7 @@ the the string `?` when there is a value missing.
 
 ```julia
 data = CSV.File(path; header=headers, missingstring="?") |> DataFrame;
-
+nothing #hide
 ```
 
 We can display the first 10 rows from the dataset
@@ -90,14 +90,14 @@ an unncessary feature called `id`, so we will remove it.
 
 ```julia
 select!(data, Not(:id));
-
+nothing #hide
 ```
 
 We also need to remove all the missing data from the `DataFrame`
 
 ```julia
 data = dropmissing(data);
-
+nothing #hide
 ```
 
 The `class` column should be of type `categorical`, following the `MLJ` API, so we
@@ -105,7 +105,7 @@ encode it here.
 
 ```julia
 transform!(data, :class => categorical, renamecols=false);
-
+nothing #hide
 ```
 
 Check statistics per column.
@@ -135,14 +135,14 @@ Split the dataset into training and testing.
 
 ```julia
 y, X = unpack(data, ==(:class), colname -> true);
-
+nothing #hide
 ```
 
 We will use only 2/3 for training.
 
 ```julia
 train, test = partition(eachindex(y), 2 / 3, shuffle=true, rng=rng);
-
+nothing #hide
 ```
 
 Always remove mean and set the standard deviation to 1.0 when dealing with SVMs.
@@ -150,11 +150,11 @@ Always remove mean and set the standard deviation to 1.0 when dealing with SVMs.
 ```julia
 stand1 = Standardizer(count=true);
 X = MLJBase.transform(fit!(machine(stand1, X)), X);
-
+nothing #hide
 ```
 
 ```
-┌ Info: Training [34mMachine{Standardizer} @648[39m.
+┌ Info: Training [34mMachine{Standardizer} @007[39m.
 └ @ MLJBase /home/edwin/.julia/packages/MLJBase/5TNcr/src/machines.jl:319
 
 ```
@@ -189,7 +189,7 @@ We now create our model with `Elysivm`
 
 ```julia
 model = Elysivm.LSSVClassifier();
-
+nothing #hide
 ```
 
 These are the values for the hyperparameter grid search. We need to find the best subset
@@ -203,7 +203,7 @@ sigma_values = [0.5, 5.0, 10.0, 15.0, 25.0, 50.0, 100.0, 250.0, 500.0];
 r1 = MLJBase.range(model, :σ, values=sigma_values);
 gamma_values = [0.01, 0.05, 0.1, 0.5, 1.0, 5.0, 10.0, 50.0, 100.0, 500.0, 1000.0];
 r2 = MLJBase.range(model, :γ, values=gamma_values);
-
+nothing #hide
 ```
 
 We now create a `TunedModel` that will use a 10-folds stratified cross validation scheme
@@ -221,7 +221,7 @@ self_tuning_model = TunedModel(
     measure=accuracy,
     acceleration=CPUThreads(), # We use this to enable multithreading
 );
-
+nothing #hide
 ```
 
 Once the best model is found, we create a `machine` with it, and fit it
@@ -229,7 +229,7 @@ Once the best model is found, we create a `machine` with it, and fit it
 ```julia
 mach = machine(self_tuning_model, X, y);
 fit!(mach, rows=train, verbosity=0);
-
+nothing #hide
 ```
 
 We can now show the best hyperparameters found.
@@ -243,7 +243,7 @@ LSSVClassifier(
     kernel = :rbf,
     γ = 0.01,
     σ = 0.5,
-    degree = 0)[34m @203[39m
+    degree = 0)[34m @261[39m
 ```
 
 And we test the trained model. We expect somewhere around 94%-96% accuracy.
@@ -251,7 +251,7 @@ And we test the trained model. We expect somewhere around 94%-96% accuracy.
 ```julia
 results = predict(mach, rows=test);
 acc = accuracy(results, y[test]);
-
+nothing #hide
 ```
 
 Show the accuracy for the testing set

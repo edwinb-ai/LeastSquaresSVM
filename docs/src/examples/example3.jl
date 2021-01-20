@@ -58,16 +58,16 @@ describe(dfnew[1:20, 1:10], :mean, :std, :eltype)
 # Split the dataset into training and testing sets.
 y, X = unpack(dfnew, ==(:y), colname -> true);
 train, test = partition(eachindex(y), 0.75, shuffle=true, rng=rng);
-stand1 = Standardizer();
-X = MLJBase.transform(MLJBase.fit!(MLJBase.machine(stand1, X)), X);
 
-# We should make sure that the features have mean close to zero and an unitary standard
-# deviation. Again, using only a small subset.
-X_df = DataFrame(X)
-describe(X_df[1:20, 1:10], :mean, :std, :eltype)
-
+# In this document, we will use a _pipeline_ to integrate both the standardization and
+# the LS-SVM classifier into one step. This should make it easier to train and to also
+# showcase the ease of use of the `@pipeline` macro from `MLJ.jl`.
+#
+# First, we define our classifier and the hyperparameter range. The `self_tuning_model`
+# variable will hold the model with the best performance.
+#
 # For the case of a _linear_ kernel, no hyperparameter is needed. Instead, the only
-# hyperparameter that needs to be adjusted is the ``\gamma`` value that is intrinsic
+# hyperparameter that needs to be adjusted is the ``\sigma`` value that is intrinsic
 # of the least-squares formulation. We will search for a good hyperparameter now.
 #
 # We will use the `accuracy` as a metric. The accuracy is simply defined as
@@ -78,14 +78,6 @@ describe(X_df[1:20, 1:10], :mean, :std, :eltype)
 #
 # Note that the accuracy is not always a good measure of classification, but it will do
 # fine on this dataset.
-#
-# !!! warning
-#     Remember that the least-squares formulation uses **all** the data samples, so the
-#     following will actually consume at least > 6 GB of RAM. Do not run this on your
-#     hardware if you are not sure you have this kind of resources available.
-#     At the very least, replace `CPUThreads()` with `CPU1()` to disable multithreading.
-#     Methods to handle memory more efficiently will be available in future
-#     versions.
 #
 model = LSSVClassifier(kernel=:linear);
 r1 = range(model, :σ, lower=1.0, upper=1000.0);
@@ -98,16 +90,30 @@ self_tuning_model = TunedModel(
     acceleration=CPUThreads(), # We use this to enable multithreading
 );
 
-# And now we proceed to train all the models and find the best one!
-mach = machine(self_tuning_model, X, y);
-fit!(mach, rows=train, verbosity=0);
-fitted_params(mach).best_model
+# Then, we will build the pipeline. The first step is to standardize the inputs and then
+# pass it to the classifier.
+pipe = @pipeline(Standardizer(), self_tuning_model);
 
-# Having found the best hyperparameters for the regressor model we proceed to check how the
-# model generalizes and we use the test set to check the performance.
+# !!! warning
+#     Remember that the least-squares formulation uses **all** the data samples, so the
+#     following will actually consume at least 6 GB of RAM or more. Do not run this on
+#     your hardware if you are not sure you have this kind of resources available.
+#     At the very least, replace `CPUThreads()` with `CPU1()` to disable multithreading.
+#     Methods to handle memory more efficiently will be available in future
+#     versions.
+#
+# And now we proceed to train all the models and find the best one!
+#
+mach = machine(pipe, X, y);
+fit!(mach, rows=train, verbosity=0);
+fitted_params(mach).deterministic_tuned_model.best_model
+
+# Having found the best hyperparameters for the regressor model we proceed to check how
+# the model generalizes.
+# To do this we use the test set to check the performance.
 ŷ = MLJBase.predict(mach, rows=test);
-result = accuracy(ŷ, y[test])
-@show result # Check th
+result = accuracy(ŷ, y[test]);
+result
 
 # We can see that we did quite well. A value of 1, or close enough, means the classifier
 # is _perfect._ That is, it can classify correctly between each class.

@@ -76,9 +76,9 @@ first(dfnew[:, 1:8], 3) |> pretty
 │ Float64    │ Float64    │ Float64    │ Float64    │ Float64    │ Float64    │ Float64    │ Float64    │
 │ Continuous │ Continuous │ Continuous │ Continuous │ Continuous │ Continuous │ Continuous │ Continuous │
 ├────────────┼────────────┼────────────┼────────────┼────────────┼────────────┼────────────┼────────────┤
-│ -1.83751   │ -8.48306   │ 4.28848    │ 5.58993    │ 9.24882    │ -9.12689   │ -0.696171  │ -0.460113  │
-│ -1.75552   │ -7.2933    │ 2.96862    │ 5.83471    │ 8.86175    │ -9.40532   │ -1.41453   │ -0.710507  │
-│ -9.09264   │ -8.53732   │ -6.44803   │ 9.51166    │ 7.89959    │ 11.4616    │ -0.481532  │ -5.18937   │
+│ 1.01938    │ -4.99063   │ 5.48589    │ 0.882268   │ -9.71061   │ -9.72927   │ 8.00808    │ 4.72959    │
+│ -8.22606   │ -9.54193   │ -0.31987   │ -1.69408   │ 3.98246    │ 4.80004    │ -2.20319   │ -5.64188   │
+│ -8.90342   │ -7.33954   │ -2.63197   │ -4.27276   │ 6.63767    │ 5.07014    │ -3.02163   │ -6.24793   │
 └────────────┴────────────┴────────────┴────────────┴────────────┴────────────┴────────────┴────────────┘
 
 ```
@@ -92,19 +92,19 @@ describe(dfnew[1:20, 1:10], :mean, :std, :eltype)
 
 ```
 10×4 DataFrame
- Row │ variable  mean       std       eltype
-     │ Symbol    Float64    Float64   DataType
-─────┼─────────────────────────────────────────
-   1 │ x1        -4.97356   3.02476   Float64
-   2 │ x2        -7.32772   1.28577   Float64
-   3 │ x3        -2.95273   6.13712   Float64
-   4 │ x4         7.34868   2.09713   Float64
-   5 │ x5         6.77488   2.15255   Float64
-   6 │ x6         0.745583  9.62697   Float64
-   7 │ x7        -0.928026  0.847911  Float64
-   8 │ x8        -4.12216   3.04683   Float64
-   9 │ x9         1.24296   3.78326   Float64
-  10 │ x10       -0.396007  7.00897   Float64
+ Row │ variable  mean      std      eltype
+     │ Symbol    Float64   Float64  DataType
+─────┼───────────────────────────────────────
+   1 │ x1        -4.08296  5.27465  Float64
+   2 │ x2        -7.1703   2.47751  Float64
+   3 │ x3         1.30113  3.66262  Float64
+   4 │ x4        -1.42658  1.8297   Float64
+   5 │ x5        -1.3031   7.63619  Float64
+   6 │ x6        -1.41037  7.69052  Float64
+   7 │ x7         2.94605  5.19719  Float64
+   8 │ x8        -1.61245  6.06555  Float64
+   9 │ x9        -3.64552  1.02827  Float64
+  10 │ x10       -2.48375  2.26526  Float64
 ```
 
 Recall that we also need to standardize the dataset, we can see here that the mean is
@@ -115,44 +115,18 @@ Split the dataset into training and testing sets.
 ```julia
 y, X = unpack(dfnew, ==(:y), colname -> true);
 train, test = partition(eachindex(y), 0.75, shuffle=true, rng=rng);
-stand1 = Standardizer();
-X = MLJBase.transform(MLJBase.fit!(MLJBase.machine(stand1, X)), X);
 
 ```
 
-```
-┌ Info: Training [34mMachine{Standardizer} @093[39m.
-└ @ MLJBase /home/edwin/.julia/packages/MLJBase/5TNcr/src/machines.jl:319
+In this document, we will use a _pipeline_ to integrate both the standardization and
+the LS-SVM classifier into one step. This should make it easier to train and to also
+showcase the ease of use of the `@pipeline` macro from `MLJ.jl`.
 
-```
-
-We should make sure that the features have mean close to zero and an unitary standard
-deviation. Again, using only a small subset.
-
-```julia
-X_df = DataFrame(X)
-describe(X_df[1:20, 1:10], :mean, :std, :eltype)
-```
-
-```
-10×4 DataFrame
- Row │ variable  mean        std       eltype
-     │ Symbol    Float64     Float64   DataType
-─────┼──────────────────────────────────────────
-   1 │ x1        -0.133188   1.10637   Float64
-   2 │ x2         0.518277   1.10013   Float64
-   3 │ x3        -0.0332144  0.920852  Float64
-   4 │ x4        -0.003687   0.948112  Float64
-   5 │ x5         0.0116106  0.876971  Float64
-   6 │ x6         0.178795   1.0669    Float64
-   7 │ x7        -0.0214703  0.780705  Float64
-   8 │ x8        -0.160642   1.09445   Float64
-   9 │ x9        -0.0385091  0.925363  Float64
-  10 │ x10       -0.165552   1.08708   Float64
-```
+First, we define our classifier and the hyperparameter range. The `self_tuning_model`
+variable will hold the model with the best performance.
 
 For the case of a _linear_ kernel, no hyperparameter is needed. Instead, the only
-hyperparameter that needs to be adjusted is the ``\gamma`` value that is intrinsic
+hyperparameter that needs to be adjusted is the ``\sigma`` value that is intrinsic
 of the least-squares formulation. We will search for a good hyperparameter now.
 
 We will use the `accuracy` as a metric. The accuracy is simply defined as
@@ -163,14 +137,6 @@ We will use the `accuracy` as a metric. The accuracy is simply defined as
 
 Note that the accuracy is not always a good measure of classification, but it will do
 fine on this dataset.
-
-!!! warning
-    Remember that the least-squares formulation uses **all** the data samples, so the
-    following will actually consume at least > 6 GB of RAM. Do not run this on your
-    hardware if you are not sure you have this kind of resources available.
-    At the very least, replace `CPUThreads()` with `CPU1()` to disable multithreading.
-    Methods to handle memory more efficiently will be available in future
-    versions.
 
 ```julia
 model = LSSVClassifier(kernel=:linear);
@@ -186,12 +152,28 @@ self_tuning_model = TunedModel(
 
 ```
 
+Then, we will build the pipeline. The first step is to standardize the inputs and then
+pass it to the classifier.
+
+```julia
+pipe = @pipeline(Standardizer(), self_tuning_model);
+
+```
+
+!!! warning
+    Remember that the least-squares formulation uses **all** the data samples, so the
+    following will actually consume at least 6 GB of RAM or more. Do not run this on
+    your hardware if you are not sure you have this kind of resources available.
+    At the very least, replace `CPUThreads()` with `CPU1()` to disable multithreading.
+    Methods to handle memory more efficiently will be available in future
+    versions.
+
 And now we proceed to train all the models and find the best one!
 
 ```julia
-mach = machine(self_tuning_model, X, y);
+mach = machine(pipe, X, y);
 fit!(mach, rows=train, verbosity=0);
-fitted_params(mach).best_model
+fitted_params(mach).deterministic_tuned_model.best_model
 ```
 
 ```
@@ -199,16 +181,17 @@ LSSVClassifier(
     kernel = :linear,
     γ = 1.0,
     σ = 283.9248120300752,
-    degree = 0)[34m @551[39m
+    degree = 0)[34m @150[39m
 ```
 
-Having found the best hyperparameters for the regressor model we proceed to check how the
-model generalizes and we use the test set to check the performance.
+Having found the best hyperparameters for the regressor model we proceed to check how
+the model generalizes.
+To do this we use the test set to check the performance.
 
 ```julia
 ŷ = MLJBase.predict(mach, rows=test);
-result = accuracy(ŷ, y[test])
-@show result # Check th
+result = accuracy(ŷ, y[test]);
+result
 ```
 
 ```
@@ -237,9 +220,9 @@ confusion_matrix(ŷ, y_ordered)
 ┌─────────────┼─────────────┬─────────────┤
 │  Predicted  │      1      │      2      │
 ├─────────────┼─────────────┼─────────────┤
-│      1      │     59      │      0      │
+│      1      │     64      │      0      │
 ├─────────────┼─────────────┼─────────────┤
-│      2      │      0      │     66      │
+│      2      │      0      │     61      │
 └─────────────┴─────────────┴─────────────┘
 
 ```
