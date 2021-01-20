@@ -87,7 +87,7 @@ describe(X_df[1:20, 1:10], :mean, :std, :eltype)
 #     Methods to handle memory more efficiently will be available in future
 #     versions.
 #
-model = LSSVClassifier(kernel="linear");
+model = LSSVClassifier(kernel=:linear);
 r1 = range(model, :σ, lower=1.0, upper=1000.0);
 self_tuning_model = TunedModel(
     model=model,

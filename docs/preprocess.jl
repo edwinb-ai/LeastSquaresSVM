@@ -1,7 +1,7 @@
 using Literate
 
 # ! Convert scripts to markdown using Literate
-files = Dict("example1.jl" => false, "example2.jl" => false, "example3.jl" => true)
+files = Dict("example1.jl" => true, "example2.jl" => false, "example3.jl" => true)
 
 function lit_to_md(file; execute=false)
     examples_path = joinpath("src", "examples")
