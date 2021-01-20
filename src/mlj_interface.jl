@@ -22,9 +22,15 @@ end
 
 function MMI.fit(model::LSSVClassifier, verbosity::Int, X, y)
     Xmatrix = MMI.matrix(X; transpose=true) # notice the transpose
+
+    a_target_element = y[1]
+    num_classes = length(MMI.classes(a_target_element))
+    @show(num_classes)
+
     y_plain = convert(Array{eltype(Xmatrix)}, MMI.int(y))
+
     new_y = broadcast(x -> x == 2.0 ? -1.0 : 1.0, y_plain)
-    decode  = MMI.decoder(y[1]) # for predict method
+    decode  = MMI.decoder(a_target_element) # for predict method
 
     cache = nothing
 
