@@ -116,9 +116,9 @@ Uses the information obtained from `svmtrain` such as the bias and weights to co
 - `Array`: The labels corresponding to the prediction to each of the instances in `xnew`.
 """
 function svmpredict(svm::LSSVR, fits, xnew::AbstractMatrix)
+    x, α, b = fits
     @assert size(x, 1) == size(xnew, 1)
 
-    x, α, b = fits
     kwargs = _kwargs2dict(svm)
     kern_mat = _build_kernel_matrix(x, xnew; kwargs...)
     result = sum(kern_mat .* α; dims=1) .+ b
