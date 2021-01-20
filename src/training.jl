@@ -15,8 +15,11 @@ Solves a Least Squares Support Vector Classification problem using the Conjugate
 """
 function svmtrain(svm::LSSVC, x::AbstractMatrix, y::AbstractVector)
     n = size(y, 1)
-    # Initialize the necessary matrices
-    Ω = build_omega(x, y; sigma=svm.σ, kernel=svm.kernel)
+    # Specify the keyword arguments
+    kwargs = Dict(:kernel => svm.kernel, :sigma => svm.σ, :degree => svm.degree)
+    # We build the kernel matrix and the omega matrix
+    kern_mat = _build_kernel_matrix(x; kwargs...)
+    Ω = (y .* y') .* kern_mat
     H = Ω + I / svm.γ
 
     # * Start solving the subproblems
@@ -50,10 +53,9 @@ Uses the information obtained from `svmtrain` such as the bias and weights to co
 """
 function svmpredict(svm::LSSVC, fits, xnew::AbstractMatrix)
     x, y, α, b = fits
-    # Compute the asymmetric kernel matrix in one go
-    if svm.kernel == "rbf"
-        kern_mat = KernelRBF(x, xnew, svm.σ)
-    end
+    kwargs = Dict(:kernel => svm.kernel, :sigma => svm.σ, :degree => svm.degree)
+    @assert size(x, 1) == size(xnew, 1)
+    kern_mat = _build_kernel_matrix(x, xnew; kwargs...)
     result = sum(@. kern_mat * y * α; dims=1) .+ b
     # We need to remove the trailing dimension
     result = reshape(result, size(result, 2))
@@ -78,11 +80,11 @@ Solves a Least Squares Support Vector Regression problem using the Conjugate Gra
 """
 function svmtrain(svm::LSSVR, x::AbstractMatrix, y::AbstractVector)
     n = size(y, 1)
-    # Here, the omega matrix is just the kernel matrix
-    if svm.kernel == "rbf"
-        Ω = KernelRBF(x, svm.σ)
-    end
-    H = Ω + I / svm.γ
+    # Specify the keyword arguments
+    kwargs = Dict(:kernel => svm.kernel, :sigma => svm.σ, :degree => svm.degree)
+    # We build the kernel matrix and the omega matrix
+    kern_mat = _build_kernel_matrix(x; kwargs...)
+    H = kern_mat + I / svm.γ
 
     # * Start solving the subproblems
     # First, solve for eta
@@ -116,52 +118,12 @@ Uses the information obtained from `svmtrain` such as the bias and weights to co
 function svmpredict(svm::LSSVR, fits, xnew::AbstractMatrix)
     x, α, b = fits
     # Compute the asymmetric kernel matrix in one go
-    if svm.kernel == "rbf"
-        kern_mat = KernelRBF(x, xnew, svm.σ)
-    end
+    kwargs = Dict(:kernel => svm.kernel, :sigma => svm.σ, :degree => svm.degree)
+    @assert size(x, 1) == size(xnew, 1)
+    kern_mat = _build_kernel_matrix(x, xnew; kwargs...)
     result = sum(kern_mat .* α; dims=1) .+ b
     # We need to remove the trailing dimension
     result = reshape(result, size(result, 2))
 
     return result
-end
-
-@doc raw"""
-    build_omega(x::AbstractMatrix, y::AbstractVector, sigma::Float64;
-        kernel::String="rbf") -> AbstractMatrix
-
-It builds a matrix, known as the "omega matrix", that contains the following information
-
-``\Omega_{kl} = y_{k} y_{l} K(x_{k}, x_{l})``
-
-with ``k,l=1,\dots,N``, and ``N`` being the length of `x`. In other words, the number of training instances.
-
-This matrix contains information about the mapping to a new space using the kernel. It is exclusively used in the training step of the learning procedure.
-
-# Arguments
-- `x::AbstractMatrix`: The data matrix with the training instances.
-- `y::AbstractVector`: The labels for each of the instances in `x`.
-
-# Keywords
-- `kernel::String="rbf"`: The kernel to be used. For now, only the RBF kernel is implemented.
-- `sigma::Float64`: The hyperparameter for the RBF kernel.
-
-# Returns
-- `Ω`: The omega matrix computed as shown above.
-"""
-function build_omega(
-    x::AbstractMatrix,
-    y::AbstractVector;
-    sigma::Float64=1.0,
-    kernel::String="rbf",
-)
-    if kernel == "rbf"
-        # Compute using own RBF type
-        kern_mat = KernelRBF(x, sigma)
-    end
-
-    # Compute omega matrix
-    Ω = (y .* y') .* kern_mat
-
-    return Ω
 end

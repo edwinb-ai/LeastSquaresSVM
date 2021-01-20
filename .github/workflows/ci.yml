@@ -18,7 +18,6 @@ jobs:
           - windows-latest
         arch:
           - x64
-          - x86
         exclude:
           - version: "nightly"
           - os: macOS-latest
@@ -65,5 +64,6 @@ jobs:
             doctest(Elysivm)'
       - run: julia --project=docs docs/make.jl
         env:
+          JULIA_NUM_THREADS: ${{ matrix.threads }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           DOCUMENTER_KEY: ${{ secrets.DOCUMENTER_KEY }}

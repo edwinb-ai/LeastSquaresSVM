@@ -23,7 +23,7 @@ using MLJ, MLJBase
 using DataFrames, CSV
 using CategoricalArrays
 using Random, Statistics
-import Elysivm
+using Elysivm
 ```
 
 We then need to specify a seed to enable reproducibility of the results.
