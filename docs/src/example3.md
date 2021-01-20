@@ -19,7 +19,7 @@ using CategoricalArrays, Random
 using Plots
 gr();
 rng = MersenneTwister(812);
-nothing #hide
+
 ```
 
 For this example, we will create a large classification problem. It is actually
@@ -35,7 +35,7 @@ as being a good use case or rule of thumb
 
 ```julia
 X, y = MLJ.make_blobs(500, 2_000; centers=2, cluster_std=[1.5, 0.5]);
-nothing #hide
+
 ```
 
 Of course, this is just to showcase the implementation within `Elysivm`. There are
@@ -53,14 +53,14 @@ as well as a better integration with `MLJ`.
 ```julia
 df = DataFrame(X);
 df.y = y;
-nothing #hide
+
 ```
 
 Recall that we need to change the primitive types of `Julia` to `scitypes`.
 
 ```julia
 dfnew = coerce(df, autotype(df));
-nothing #hide
+
 ```
 
 We can then observe the first three columns, together with their new types.
@@ -117,7 +117,7 @@ y, X = unpack(dfnew, ==(:y), colname -> true);
 train, test = partition(eachindex(y), 0.75, shuffle=true, rng=rng);
 stand1 = Standardizer();
 X = MLJBase.transform(MLJBase.fit!(MLJBase.machine(stand1, X)), X);
-nothing #hide
+
 ```
 
 ```
@@ -183,7 +183,7 @@ self_tuning_model = TunedModel(
     measure=accuracy,
     acceleration=CPUThreads(), # We use this to enable multithreading
 );
-nothing #hide
+
 ```
 
 And now we proceed to train all the models and find the best one!
