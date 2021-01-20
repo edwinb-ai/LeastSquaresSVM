@@ -16,7 +16,7 @@ Solves a Least Squares Support Vector Classification problem using the Conjugate
 function svmtrain(svm::LSSVC, x::AbstractMatrix, y::AbstractVector)
     n = size(y, 1)
     # Specify the keyword arguments
-    kwargs = Dict(:kernel => svm.kernel, :sigma => svm.σ, :degree => svm.degree)
+    kwargs = _kwargs2dict(svm)
     # We build the kernel matrix and the omega matrix
     kern_mat = _build_kernel_matrix(x; kwargs...)
     Ω = (y .* y') .* kern_mat
@@ -53,7 +53,7 @@ Uses the information obtained from `svmtrain` such as the bias and weights to co
 """
 function svmpredict(svm::LSSVC, fits, xnew::AbstractMatrix)
     x, y, α, b = fits
-    kwargs = Dict(:kernel => svm.kernel, :sigma => svm.σ, :degree => svm.degree)
+    kwargs = _kwargs2dict(svm)
     @assert size(x, 1) == size(xnew, 1)
     kern_mat = _build_kernel_matrix(x, xnew; kwargs...)
     result = sum(@. kern_mat * y * α; dims=1) .+ b
@@ -81,7 +81,7 @@ Solves a Least Squares Support Vector Regression problem using the Conjugate Gra
 function svmtrain(svm::LSSVR, x::AbstractMatrix, y::AbstractVector)
     n = size(y, 1)
     # Specify the keyword arguments
-    kwargs = Dict(:kernel => svm.kernel, :sigma => svm.σ, :degree => svm.degree)
+    kwargs = _kwargs2dict(svm)
     # We build the kernel matrix and the omega matrix
     kern_mat = _build_kernel_matrix(x; kwargs...)
     H = kern_mat + I / svm.γ
@@ -116,12 +116,13 @@ Uses the information obtained from `svmtrain` such as the bias and weights to co
 - `Array`: The labels corresponding to the prediction to each of the instances in `xnew`.
 """
 function svmpredict(svm::LSSVR, fits, xnew::AbstractMatrix)
-    x, α, b = fits
-    # Compute the asymmetric kernel matrix in one go
-    kwargs = Dict(:kernel => svm.kernel, :sigma => svm.σ, :degree => svm.degree)
     @assert size(x, 1) == size(xnew, 1)
+
+    x, α, b = fits
+    kwargs = _kwargs2dict(svm)
     kern_mat = _build_kernel_matrix(x, xnew; kwargs...)
     result = sum(kern_mat .* α; dims=1) .+ b
+
     # We need to remove the trailing dimension
     result = reshape(result, size(result, 2))
 
