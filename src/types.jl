@@ -7,7 +7,7 @@ abstract type SVM end
 
 """
     LSSVC()
-    LSSVC(; kernel="rbf", γ=1.0, σ=1.0)
+    LSSVC(; kernel="rbf", γ=1.0, σ=1.0, degree=0)
 
 The type to hold a Least Squares Support Vector Classifier.
 
@@ -15,16 +15,13 @@ The type to hold a Least Squares Support Vector Classifier.
 - `kernel::String`: The kind of kernel to use for the non-linear mapping of the data.
 - `γ::Float64`: The gamma hyperparameter that is intrinsic of the Least Squares version of the Support Vector Machines.
 - `σ::Float64`: The hyperparameter for the RBF kernel.
+- `degree::Int`: The degree of the polynomial kernel. Only used if `kernel` is "poly".
 
-# Keywords
-- `kernel`: A string to denote the kernel to be used.
-- `γ`: A float value to assign the gamma hyperparameter.
-- `σ`: A float value to assign the sigma hyperparameter.
 """
 mutable struct LSSVC <: SVM
     kernel::String
-    γ::AbstractFloat
-    σ::AbstractFloat
+    γ::Float64
+    σ::Float64
     degree::Int
 end
 
@@ -32,7 +29,7 @@ LSSVC(; kernel="rbf", γ=1.0, σ=1.0, degree::Int=0) = LSSVC(kernel, γ, σ, deg
 
 """
     LSSVR()
-    LSSVR(; kernel="rbf", γ=1.0, σ=1.0)
+    LSSVR(; kernel="rbf", γ=1.0, σ=1.0, degree=0)
 
 The type to hold a Least Squares Support Vector Regressor.
 
@@ -40,11 +37,8 @@ The type to hold a Least Squares Support Vector Regressor.
 - `kernel::String`: The kind of kernel to use for the non-linear mapping of the data.
 - `γ::Float64`: The gamma hyperparameter that is intrinsic of the Least Squares version of the Support Vector Machines.
 - `σ::Float64`: The hyperparameter for the RBF kernel.
+- `degree::Int`: The degree of the polynomial kernel. Only used if `kernel` is "poly".
 
-# Keywords
-- `kernel`: A string to denote the kernel to be used.
-- `γ`: A float value to assign the gamma hyperparameter.
-- `σ`: A float value to assign the sigma hyperparameter.
 """
 mutable struct LSSVR <: SVM
     kernel::String
