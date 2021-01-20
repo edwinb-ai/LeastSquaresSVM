@@ -24,7 +24,7 @@ df = DataFrame(X);
 df.y = y;
 
 # A very important part of the `MLJ` framework is its use of `scitypes`, a special kind of
-# types that work together with the objects from the framework. Because the regression
+# type that work together with the objects from the framework. Because the regression
 # problem has the `Julia` types we need to convert this types to correct `scitypes` such
 # such that the `machine`s from `MLJ` work fine.
 dfnew = coerce(df, autotype(df));
