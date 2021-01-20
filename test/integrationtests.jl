@@ -78,8 +78,7 @@ using CategoricalArrays
 
 @testset "Multiclass classification" begin
     X, y = @load_iris
-    train, test = partition(eachindex(y), 0.6)
-    display(y[train])
+    train, test = partition(eachindex(y), 0.6, shuffle=true, rng=30)
     pipe = @pipeline(Standardizer(), LSSVClassifier(γ=80.0, σ=0.1))
     mach = MLJBase.machine(pipe, X, y)
     MLJBase.fit!(mach, rows=train)
