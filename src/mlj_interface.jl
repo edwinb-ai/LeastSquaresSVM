@@ -71,12 +71,17 @@ end
 
 function MMI.predict(model::LSSVClassifier, fitresult, Xnew)
     Xmatrix = MMI.matrix(Xnew; transpose=true) # notice the transpose
-    (svm, fitted, decode) = fitresult
-    results = svmpredict(svm, fitted, Xmatrix)
-    results = broadcast(x -> x == -1.0 ? 2.0 : 1.0, results)
-    y = convert(Array{UInt64}, results)
+    n_fits = length(fitresult) # number of elements from the fit step
 
-    return decode(y)
+    if n == 3 # binary classification
+        (svm, fitted, decode) = fitresult
+        results = svmpredict(svm, fitted, Xmatrix)
+        results = broadcast(x -> x == -1.0 ? 2.0 : 1.0, results)
+        y = convert(Array{UInt64}, results)
+        predictions = decode(y)
+    end
+
+    return predictions
 end
 
 function MMI.predict(model::LSSVRegressor, fitresult, Xnew)
