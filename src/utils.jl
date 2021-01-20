@@ -78,3 +78,9 @@ end
 dictionary that makes it easier to handle as keyword arguments.
 """
 _kwargs2dict(svm) = Dict(:kernel => svm.kernel, :sigma => svm.σ, :degree => svm.degree)
+
+function _find_and_copy(k, y)
+    indices = findall(isequal(k), y)
+
+    return copy(y[indices])
+end
