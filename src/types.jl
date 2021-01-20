@@ -29,7 +29,7 @@ LSSVC(; kernel=:rbf, γ=1.0, σ=1.0, degree::Int=0) = LSSVC(kernel, γ, σ, degr
 
 """
     LSSVR()
-    LSSVR(; kernel="rbf", γ=1.0, σ=1.0, degree=0)
+    LSSVR(; kernel=:rbf, γ=1.0, σ=1.0, degree=0)
 
 The type to hold a Least Squares Support Vector Regressor.
 
