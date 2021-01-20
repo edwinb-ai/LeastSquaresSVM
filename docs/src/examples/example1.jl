@@ -33,7 +33,7 @@ headers = [
 ];
 
 # We define the path were the dataset is located
-path = joinpath("examples", "wbc.csv");
+path = joinpath("src", "examples", "wbc.csv");
 
 # We load the csv file and convert it to a `DataFrame`. Note that we are specifying
 # to the file reader to replace the string `?` to a `missing` value. This dataset contains
