@@ -25,21 +25,36 @@ function MMI.fit(model::LSSVClassifier, verbosity::Int, X, y)
 
     a_target_element = y[1]
     num_classes = length(MMI.classes(a_target_element))
-    @show(num_classes)
 
-    y_plain = convert(Array{eltype(Xmatrix)}, MMI.int(y))
+    if num_classes == 2 # binary classification
+        y_plain = convert(Array{eltype(Xmatrix)}, MMI.int(y))
 
-    new_y = broadcast(x -> x == 2.0 ? -1.0 : 1.0, y_plain)
-    decode  = MMI.decoder(a_target_element) # for predict method
+        new_y = broadcast(x -> x == 2.0 ? -1.0 : 1.0, y_plain)
+        decode  = MMI.decoder(a_target_element) # for predict method
 
-    cache = nothing
+        cache = nothing
 
-    svm = LSSVC(;kernel=model.kernel, γ=model.γ, σ=model.σ)
-    fitted = svmtrain(svm, Xmatrix, new_y)
+        svm = LSSVC(;kernel=model.kernel, γ=model.γ, σ=model.σ)
+        fitted = svmtrain(svm, Xmatrix, new_y)
 
-    fitresult = (deepcopy(svm), fitted, decode)
+        fitresult = (deepcopy(svm), fitted, decode)
 
-    report = (kernel = model.kernel, γ = model.γ, σ = model.σ)
+        report = (kernel = model.kernel, γ = model.γ, σ = model.σ)
+    else # multiclass classification
+        y_plain = convert(Array{eltype(Xmatrix)}, MMI.int(y))
+
+        new_y = broadcast(x -> x == 2.0 ? -1.0 : 1.0, y_plain)
+        decode  = MMI.decoder(a_target_element) # for predict method
+
+        cache = nothing
+
+        svm = LSSVC(;kernel=model.kernel, γ=model.γ, σ=model.σ)
+        fitted = svmtrain_mc(svm, Xmatrix, new_y, num_classes)
+
+        fitresult = (deepcopy(svm), fitted, decode)
+
+        report = (kernel = model.kernel, γ = model.γ, σ = model.σ)
+    end
 
     return (fitresult, cache, report)
 end

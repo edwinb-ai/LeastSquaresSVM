@@ -65,6 +65,12 @@ function svmpredict(svm::LSSVC, fits, xnew::AbstractMatrix)
     return sign.(result)
 end
 
+function svmtrain_mc(svm::LSSVC, x, y, nclass)
+    @info("Multiclass classification")
+
+    return nothing
+end
+
 """
     svmtrain(svm::LSSVR, x::AbstractMatrix, y::AbstractVector) -> Tuple
 
