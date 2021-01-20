@@ -66,16 +66,25 @@ function svmpredict(svm::LSSVC, fits, xnew::AbstractMatrix)
 end
 
 function svmtrain_mc(svm::LSSVC, x, y, nclass)
+    num_classifiers = nclass * (nclass - 1) / 2
+    classifiers = Vector{Tuple}(undef, Int(num_classifiers))
+
     for idx in 1:nclass-1
-        a_class = _find_and_copy(idx, y)
+        a_class, a_idxs = _find_and_copy(idx, y)
         a_class .= 1.0
         for jdx in (idx + 1):nclass
-            b_class = _find_and_copy(idx, y)
+            b_class, b_idxs = _find_and_copy(idx, y)
             b_class .= -1.0
+
+            # Train a binary classification problem with classes a and b
+            all_indxs = vcat(a_idxs, b_idxs) # Join all indices
+            all_classes = vcat(a_class, b_class)
+            fits = svmtrain(deepcopy(svm), x[all_indxs], all_classes)
+            push!(classifiers, fits)
         end
     end
 
-    return nothing
+    return classifiers
 end
 
 """

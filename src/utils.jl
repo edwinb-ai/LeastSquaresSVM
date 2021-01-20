@@ -79,8 +79,13 @@ dictionary that makes it easier to handle as keyword arguments.
 """
 _kwargs2dict(svm) = Dict(:kernel => svm.kernel, :sigma => svm.σ, :degree => svm.degree)
 
+"""
+    Function to find all the instances in an array `y` that are
+equal to some value `k`. It returns a copy of the array and the indices where the
+condition is met.
+"""
 function _find_and_copy(k, y)
     indices = findall(isequal(k), y)
 
-    return copy(y[indices])
+    return (copy(y[indices]), indices)
 end

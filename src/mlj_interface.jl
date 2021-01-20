@@ -29,10 +29,10 @@ function MMI.fit(model::LSSVClassifier, verbosity::Int, X, y)
     decode  = MMI.decoder(a_target_element) # for predict method
     y_plain = convert(Array{eltype(Xmatrix)}, MMI.int(y))
 
+    cache = nothing
+
     if num_classes == 2 # binary classification
         new_y = broadcast(x -> x == 2.0 ? -1.0 : 1.0, y_plain)
-
-        cache = nothing
 
         svm = LSSVC(;kernel=model.kernel, γ=model.γ, σ=model.σ)
         fitted = svmtrain(svm, Xmatrix, new_y)
@@ -42,7 +42,9 @@ function MMI.fit(model::LSSVClassifier, verbosity::Int, X, y)
         report = (kernel = model.kernel, γ = model.γ, σ = model.σ)
     else # multiclass classification
         svm = LSSVC(; kernel=model.kernel, γ=model.γ, σ=model.σ)
-        svmtrain_mc(svm, Xmatrix, y_plain, num_classes)
+        fitted = svmtrain_mc(svm, Xmatrix, y_plain, num_classes)
+        fitresult = (fitted, decode)
+        report = (kernel = model.kernel, γ = model.γ, σ = model.σ)
     end
 
     return (fitresult, cache, report)
