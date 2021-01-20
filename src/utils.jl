@@ -21,7 +21,7 @@ The matrix is built using the `kernelmatrix!` functions from `KernelFunctions.jl
 - `y::AbstractMatrix`: Another data matrix, normally used for the prediction step in the classification implementation.
 
 # Keywords
-- `kernel::String="rbf"`: The kernel to be used. The available options are "rbf" for a RBF type kernel; "linear", for a classic linear kernel; and "poly" for a polynomial kernel.
+- `kernel::Symbol=:rbf`: The kernel to be used. The available options are `:rbf` for a RBF type kernel; `:linear`, for a classic linear kernel; and `:poly` for a polynomial kernel. The degree of the polynomial is handled with the `degree` keyword argument.
 - `sigma::Float64`: The hyperparameter for the RBF kernel.
 - `degree::Float64`: The degree of the polynomial kernel if "poly" is chosen.
 
@@ -32,15 +32,15 @@ function _build_kernel_matrix(x; kwargs...)
     # Extract the matrix for the keyword arguments
     kernel = kwargs[:kernel]
 
-    if kernel == "rbf"
+    if kernel == :rbf
         # Create the kernel with the corresponding scale
         t = ScaleTransform(_revert(kwargs[:sigma]))
         κ = transform(SqExponentialKernel(), t)
         kern_mat = kernelmatrix(κ, x)
-    elseif kernel == "linear"
+    elseif kernel == :linear
         κ = LinearKernel()
         kern_mat = kernelmatrix(κ, x)
-    elseif kernel == "poly"
+    elseif kernel == :poly
         # Create the kernel with the corresponding degree
         κ = PolynomialKernel(; degree=kwargs[:degree], c=0.0)
         kern_mat = kernelmatrix(κ, x)
@@ -56,15 +56,15 @@ function _build_kernel_matrix(x, y; kwargs...)
     # Extract the matrix for the keyword arguments
     kernel = kwargs[:kernel]
 
-    if kernel == "rbf"
+    if kernel == :rbf
         # Create the kernel with the corresponding scale
         t = ScaleTransform(_revert(kwargs[:sigma]))
         κ = transform(SqExponentialKernel(), t)
         kern_mat = kernelmatrix(κ, x, y)
-    elseif kernel == "linear"
+    elseif kernel == :linear
         κ = LinearKernel()
         kern_mat = kernelmatrix(κ, x, y)
-    elseif kernel == "poly"
+    elseif kernel == :poly
         # Create the kernel with the corresponding degree
         κ = PolynomialKernel(; degree=kwargs[:degree], c=0.0)
         kern_mat = kernelmatrix(κ, x, y)
