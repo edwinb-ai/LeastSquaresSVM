@@ -66,7 +66,20 @@ function svmpredict(svm::LSSVC, fits, xnew::AbstractMatrix)
 end
 
 function svmtrain_mc(svm::LSSVC, x, y, nclass)
-    @info("Multiclass classification")
+    for idx in 1:nclass-1
+        a_idx = findall(isequal(idx), y)
+        a_class = copy(y[a_idx])
+        display(a_class)
+        a_class .= 1.0
+        display(a_class)
+        for jdx in (idx + 1):nclass
+            b_idx = findall(isequal(jdx), y)
+            b_class = copy(y[b_idx])
+            display(b_class)
+            b_class .= -1.0
+            display(b_class)
+        end
+    end
 
     return nothing
 end
