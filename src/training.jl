@@ -67,20 +67,31 @@ end
 
 function svmtrain_mc(svm::LSSVC, x, y, nclass)
     num_classifiers = nclass * (nclass - 1) / 2
+    # Create a collection to store all the classifiers
     classifiers = Vector{Tuple}(undef, Int(num_classifiers))
+    c_idx = 1 # For keeping track of the classifiers
 
     for idx in 1:nclass-1
+        # Get the elements and indices for the first class
         a_class, a_idxs = _find_and_copy(idx, y)
-        a_class .= 1.0
+        a_class .= 1.0 # This class is always 1.0
         for jdx in (idx + 1):nclass
+            # Get the elements and indices for the second class
             b_class, b_idxs = _find_and_copy(idx, y)
-            b_class .= -1.0
+            b_class .= -1.0 # This class is always -1.0
 
-            # Train a binary classification problem with classes a and b
+            # Train a binary classification problem with the first and second classes
             all_indxs = vcat(a_idxs, b_idxs) # Join all indices
-            all_classes = vcat(a_class, b_class)
-            fits = svmtrain(deepcopy(svm), x[all_indxs], all_classes)
-            push!(classifiers, fits)
+            all_classes = vcat(a_class, b_class) # Join both classes
+
+            # Always copy the model and use views for the samples
+            samples = @view(x[:, all_indxs])
+            fits = svmtrain(deepcopy(svm), samples, all_classes)
+
+            # We save the values of that classifier and add one to the index in
+            # the collection
+            classifiers[c_idx] = fits
+            c_idx += 1
         end
     end
 
