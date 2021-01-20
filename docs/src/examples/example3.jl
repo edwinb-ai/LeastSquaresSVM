@@ -25,7 +25,7 @@ rng = MersenneTwister(812);
 # > Whenever the number of features is _larger_ than the number of instances, use a
 # > linear kernel.
 #
-X, y = MLJ.make_blobs(500, 2_000; centers=2, cluster_std=[1.5, 0.5])
+X, y = MLJ.make_blobs(500, 2_000; centers=2, cluster_std=[1.5, 0.5]);
 
 # Of course, this is just to showcase the implementation within `Elysivm`. There are
 # actually better ways to handle this kind of problem, e.g. dimensionality-reduction
@@ -48,8 +48,9 @@ dfnew = coerce(df, autotype(df));
 # We'll just look at the first 8 features to avoid cluttering the space.
 first(dfnew[:, 1:8], 3) |> pretty
 
-# We should also check out the basic statistics of the dataset.
-describe(dfnew, :mean, :std, :eltype)
+# We should also check out the basic statistics of the dataset. We'll only use a small
+# subset as the data frame it quite large.
+describe(dfnew[1:20, 1:10], :mean, :std, :eltype)
 
 # Recall that we also need to standardize the dataset, we can see here that the mean is
 # close to zero, but not quite, and we also need an unitary standard deviation.
@@ -61,8 +62,9 @@ stand1 = Standardizer();
 X = MLJBase.transform(MLJBase.fit!(MLJBase.machine(stand1, X)), X);
 
 # We should make sure that the features have mean close to zero and an unitary standard
-# deviation.
-describe(X |> DataFrame, :mean, :std, :eltype)
+# deviation. Again, using only a small subset.
+X_df = DataFrame(X)
+describe(X_df[1:20, 1:10], :mean, :std, :eltype)
 
 # For the case of a _linear_ kernel, no hyperparameter is needed. Instead, the only
 # hyperparameter that needs to be adjusted is the ``\gamma`` value that is intrinsic
@@ -105,7 +107,7 @@ fitted_params(mach).best_model
 # model generalizes and we use the test set to check the performance.
 ŷ = MLJBase.predict(mach, rows=test);
 result = accuracy(ŷ, y[test])
-@show result # Check the result
+@show result # Check th
 
 # We can see that we did quite well. A value of 1, or close enough, means the classifier
 # is _perfect._ That is, it can classify correctly between each class.

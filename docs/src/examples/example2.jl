@@ -5,7 +5,7 @@
 # `make_regression` function from `MLJ`.
 #
 # First, we need to import all the necessary packages.
-import Elysivm
+using Elysivm
 using MLJ, MLJBase
 using DataFrames, CSV
 using CategoricalArrays, Random

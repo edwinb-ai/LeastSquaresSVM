@@ -1,5 +1,5 @@
 ```@meta
-EditURL = "<unknown>/docs/src/examples/example2.jl"
+EditURL = "<unknown>/src/examples/example2.jl"
 ```
 
 # Regression on a synthetic dataset
@@ -11,7 +11,7 @@ In this page we will see how to perform Least Squares Support Vector Regression 
 First, we need to import all the necessary packages.
 
 ```@example example2
-import Elysivm
+using Elysivm
 using MLJ, MLJBase
 using DataFrames, CSV
 using CategoricalArrays, Random
@@ -40,7 +40,7 @@ nothing #hide
 ```
 
 A very important part of the `MLJ` framework is its use of `scitypes`, a special kind of
-types that work together with the objects from the framework. Because the regression
+type that work together with the objects from the framework. Because the regression
 problem has the `Julia` types we need to convert this types to correct `scitypes` such
 such that the `machine`s from `MLJ` work fine.
 
