@@ -72,3 +72,9 @@ function _build_kernel_matrix(x, y; kwargs...)
 
     return kern_mat
 end
+
+"""
+    Takes a Support Vector Machine type and converts some of its attributes to a
+dictionary that makes it easier to handle as keyword arguments.
+"""
+_kwargs2dict(svm) = Dict(:kernel => svm.kernel, :sigma => svm.σ, :degree => svm.degree)
