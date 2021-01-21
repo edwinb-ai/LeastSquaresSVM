@@ -76,7 +76,7 @@ function MMI.predict(model::LSSVClassifier, fitresult, Xnew)
     if n_fits == 3 # binary classification
         (svm, fitted, decode) = fitresult
         results = svmpredict(svm, fitted, Xmatrix)
-        results = broadcast(x -> x == -1.0 ? 2.0 : 1.0, results)
+        broadcast!(x -> x == -1.0 ? 2.0 : 1.0, results, results)
         y = convert(Array{UInt64}, results)
         predictions = decode(y)
     else

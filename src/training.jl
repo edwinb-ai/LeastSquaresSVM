@@ -115,8 +115,7 @@ function svmpredict_mc(fits, Xnew::AbstractMatrix)
         prediction = svmpredict(svm, p, Xnew)
 
         # Now that we have prediction, decode them using the class pairs
-        prediction[prediction .== 1.0] .= s[1]
-        prediction[prediction .== -1.0] .= s[2]
+        broadcast!(x -> x == 1.0 ? s[1] : s[2], prediction, prediction)
 
         # Save the decoded predictions to our pooling collection
         pooled_predictions[idx, :] = prediction
