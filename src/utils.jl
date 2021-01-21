@@ -90,6 +90,15 @@ function _find_and_copy(k, y)
     return (copy(y[indices]), indices)
 end
 
+"""
+    This function takes in a matrix `x` and does the following logic:
+- Obtains the unique elements from the matrix.
+- Counts how many occurrences of each element happen in the array.
+- Using `argmax`, the indices where this condition is met are extracted.
+- Finally, we only need the first dimension index, so we extract it as such.
+
+Essentially, this is a voting scheme for the multiclass classification problem.
+"""
 function _predictions_by_votes(x)
     unique_elements = unique(x) |> sort
     predictions = zeros(size(x, 2))

@@ -86,5 +86,6 @@ using CategoricalArrays
     acc = MLJBase.accuracy(results, y[test])
     @show acc
 
+    # Check that it is not NaN, and never zero
     @test isreal(acc) && acc > 0.0
 end
