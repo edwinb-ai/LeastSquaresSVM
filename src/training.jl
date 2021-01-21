@@ -70,7 +70,7 @@ function svmtrain_mc(svm::LSSVC, x, y, nclass)
     # Create a collection to store the learned parameters
     class_parameters = Vector{Tuple}(undef, Int(num_classifiers))
     # Create a collection to store the class pairs
-    class_pairs = Vector{Tuple}(undef, Int(num_classifiers))
+    class_pairs = similar(class_parameters)
     c_idx = 1 # For keeping track of the classifiers
 
     for idx in 1:nclass-1
@@ -90,7 +90,7 @@ function svmtrain_mc(svm::LSSVC, x, y, nclass)
             samples = @view(x[:, all_indxs])
             # Solve the binary classification problem between classes idx and jdx
             # new_svm = deepcopy(svm)
-            fits = svmtrain(svm, samples, all_classes)
+            fits = svmtrain(deepcopy(svm), samples, all_classes)
 
             # We save the parameters of that classifier
             class_parameters[c_idx] = fits
@@ -106,7 +106,7 @@ end
 function svmpredict_mc(fits, Xnew::AbstractMatrix)
     # Extract the model, parameters and class codes
     svm, params, pairs = fits
-    nclass = length(fits[3]) # The third element are the class pairs
+    nclass = length(pairs) # The third element are the class pairs
     # This will hold all the predictions for the classifiers
     pooled_predictions = Matrix{eltype(Xnew)}(undef, nclass, size(Xnew, 2))
 
