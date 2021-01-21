@@ -82,6 +82,8 @@ function MMI.predict(model::LSSVClassifier, fitresult, Xnew)
     else
         (fitted, decode) = fitresult
         results = svmpredict_mc(fitted, Xmatrix)
+        y = convert(Array{UInt64}, results)
+        predictions = decode(y)
     end
 
     return predictions
