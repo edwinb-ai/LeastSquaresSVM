@@ -2,13 +2,13 @@ using MLJ, MLJBase
 using Random
 using Elysivm
 
-rng = MersenneTwister(95)
+rng = MersenneTwister(951)
 
 X, y = @load_iris
 train, test = partition(eachindex(y), 0.6, shuffle=true, rng=rng)
 model = LSSVClassifier()
-r1 = range(model, :σ, lower=12, upper=15)
-r2 = range(model, :γ, lower=1000, upper=2000)
+r1 = range(model, :σ, lower=1, upper=20)
+r2 = range(model, :γ, lower=1, upper=1000)
 self_tuning_model = TunedModel(
     model=model,
     # tuning=Grid(goal=400, rng=rng),
@@ -20,10 +20,10 @@ self_tuning_model = TunedModel(
     n=500
 )
 pipe = @pipeline(Standardizer(), self_tuning_model)
-mach = MLJBase.machine(pipe, X, y)
-MLJBase.fit!(mach, rows=train)
+mach = MLJ.machine(pipe, X, y)
+MLJ.fit!(mach, rows=train)
 display(fitted_params(mach).deterministic_tuned_model.best_model)
 
-results = MLJBase.predict(mach, rows=test)
-acc = MLJBase.accuracy(results, y[test])
+results = MLJ.predict(mach, rows=test)
+acc = MLJ.accuracy(results, y[test])
 @show acc
