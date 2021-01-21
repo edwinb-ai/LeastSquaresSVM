@@ -68,17 +68,21 @@ end
 function svmtrain_mc(svm::LSSVC, x, y, nclass)
     num_classifiers = nclass * (nclass - 1) / 2
     # Create a collection to store all the classifiers
-    classifiers = Vector{Tuple}(undef, Int(num_classifiers))
+    classifiers = Vector{LSSVC}(undef, Int(num_classifiers))
+    # Create a collection to store the learned parameters
+    class_parameters = Vector{Tuple}(undef, Int(num_classifiers))
+    # Create a collection to store the class pairs
+    class_pairs = Vector{Tuple}(undef, Int(num_classifiers))
     c_idx = 1 # For keeping track of the classifiers
 
     for idx in 1:nclass-1
         # Get the elements and indices for the first class
         a_class, a_idxs = _find_and_copy(idx, y)
-        a_class .= 1.0 # This class is always 1.0
+        a_class .= 1.0 # The first class is encoded as 1.0
         for jdx in (idx + 1):nclass
             # Get the elements and indices for the second class
             b_class, b_idxs = _find_and_copy(idx, y)
-            b_class .= -1.0 # This class is always -1.0
+            b_class .= -1.0 # The second class is encoded as -1.0
 
             # Train a binary classification problem with the first and second classes
             all_indxs = vcat(a_idxs, b_idxs) # Join all indices
@@ -86,16 +90,37 @@ function svmtrain_mc(svm::LSSVC, x, y, nclass)
 
             # Always copy the model and use views for the samples
             samples = @view(x[:, all_indxs])
-            fits = svmtrain(deepcopy(svm), samples, all_classes)
+            # Solve the binary classification problem between classes idx and jdx
+            new_svm = deepcopy(svm)
+            fits = svmtrain(new_svm, samples, all_classes)
 
             # We save the values of that classifier and add one to the index in
             # the collection
-            classifiers[c_idx] = fits
+            classifiers[c_idx] = new_svm
+            class_parameters[c_idx] = fits
+            class_pairs[c_idx] = (idx, jdx)
             c_idx += 1
         end
     end
 
-    return classifiers
+    return (classifiers, class_parameters, class_pairs)
+end
+
+# TODO: Write the prediction function for multiclass classification. It should be easy to iterate over all the tuples from the fit step. Care must be taken to account for the correct classes. This might be the primary issue, how can the classes be inferred with the current information? For instance, the first tuple will classify between class 1 and 2. The second one will classify between class 1 and 3. The last one between class 2 and 3. From this, three results will be obtained for each new data instance, and a voting scheme is needed. But how can one differentiate from each one? Suppose the first instance belongs to class 3. The first classifier should return 0. The second classifier should return -1, and the third one -1 as well. The majority vote is -1. This code might be useful for i in unique(d) @show findall(isequal(i), d) |> length end for the implementation of the voting scheme.
+# TODO: What to do when there is a tie? For instance, suppose the classification result of three different classifiers is [1.0, -1.0, 0.0]. What should one do in this case?
+
+function svmpredict_mc(fits, Xnew::AbstractMatrix)
+    nclass = length(fits[3]) # The third element are the class pairs
+    pooled_predictions = Matrix{eltype(Xnew)}(undef, nclass, size(Xnew, 2))
+
+    for (idx, c, p, s) in zip(1:nclass, fits...)
+        prediction = svmpredict(c, p, Xnew)
+        prediction[prediction .== 1.0] .= s[1]
+        prediction[prediction .== -1.0] .= s[2]
+        pooled_predictions[idx, :] = prediction
+    end
+
+    display(pooled_predictions[:, 10])
 end
 
 """

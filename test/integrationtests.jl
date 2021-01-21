@@ -82,6 +82,7 @@ using CategoricalArrays
     pipe = @pipeline(Standardizer(), LSSVClassifier(γ=80.0, σ=0.1))
     mach = MLJBase.machine(pipe, X, y)
     MLJBase.fit!(mach, rows=train)
+    MLJBase.predict(mach, rows=test)
 
     @test true
 end
