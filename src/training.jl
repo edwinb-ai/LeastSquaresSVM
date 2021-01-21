@@ -104,21 +104,26 @@ function svmtrain_mc(svm::LSSVC, x, y, nclass)
 end
 
 function svmpredict_mc(fits, Xnew::AbstractMatrix)
+    # Extract the model, parameters and class codes
     svm, params, pairs = fits
     nclass = length(fits[3]) # The third element are the class pairs
+    # This will hold all the predictions for the classifiers
     pooled_predictions = Matrix{eltype(Xnew)}(undef, nclass, size(Xnew, 2))
 
     for (idx, p, s) in zip(1:nclass, params, pairs)
+        # For prediction, we just need the fitted parameters
         prediction = svmpredict(svm, p, Xnew)
+
+        # Now that we have prediction, decode them using the class pairs
         prediction[prediction .== 1.0] .= s[1]
         prediction[prediction .== -1.0] .= s[2]
+
+        # Save the decoded predictions to our pooling collection
         pooled_predictions[idx, :] = prediction
     end
 
-    # display(pooled_predictions[:, 1:20])
-
+    # Apply the voting scheme
     results = _predictions_by_votes(pooled_predictions)
-    # display(results[1:20])
 
     return results
 end

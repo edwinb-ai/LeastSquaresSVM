@@ -98,6 +98,18 @@ end
 - Finally, we only need the first dimension index, so we extract it as such.
 
 Essentially, this is a voting scheme for the multiclass classification problem.
+In the case of a tie, the smallest index is always chosen, i.e. 1. This is not the best
+strategy, but it is after the following paper:
+
+Chih-Wei Hsu and Chih-Jen Lin (2002) ‘A comparison of methods for multiclass support vector machines’, IEEE Transactions on Neural Networks, 13(2), pp. 416. doi: 10.1109/72.991427.
+
+Where it says the following quote:
+
+> [...] Then we predict is in the class with the largest vote. The
+> voting approach described above is also called the “Max Wins”
+> strategy. In case that two classes have identical votes, though it
+> may not be a good strategy, now we simply select the one with
+> the smaller index. [...]
 """
 function _predictions_by_votes(x)
     unique_elements = unique(x) |> sort
