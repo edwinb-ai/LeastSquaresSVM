@@ -120,7 +120,10 @@ function svmpredict_mc(fits, Xnew::AbstractMatrix)
         pooled_predictions[idx, :] = prediction
     end
 
-    display(pooled_predictions[:, 10])
+    display(pooled_predictions[:, 1:20])
+
+    results = _predictions_by_votes(pooled_predictions)
+    display(results[1:20])
 end
 
 """

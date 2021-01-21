@@ -89,3 +89,16 @@ function _find_and_copy(k, y)
 
     return (copy(y[indices]), indices)
 end
+
+function _predictions_by_votes(x)
+    unique_elements = unique(x) |> sort
+    predictions = zeros(size(x, 2))
+    counts = map(z->count(==(z), x, dims=1), unique_elements)
+    largest_values = argmax(vcat(counts...), dims=1)
+
+    for (i, l) in enumerate(largest_values)
+        predictions[i] = l[1]
+    end
+
+    return predictions
+end
