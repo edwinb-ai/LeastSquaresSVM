@@ -78,3 +78,48 @@ end
 dictionary that makes it easier to handle as keyword arguments.
 """
 _kwargs2dict(svm) = Dict(:kernel => svm.kernel, :sigma => svm.σ, :degree => svm.degree)
+
+"""
+    Function to find all the instances in an array `y` that are
+equal to some value `k`. It returns a copy of the array and the indices where the
+condition is met.
+"""
+function _find_and_copy(k, y)
+    indices = findall(isequal(k), y)
+
+    return (copy(y[indices]), indices)
+end
+
+"""
+    This function takes in a matrix `x` and does the following logic:
+- Obtains the unique elements from the matrix.
+- Counts how many occurrences of each element happen in the array.
+- Using `argmax`, the indices where this condition is met are extracted.
+- Finally, we only need the first dimension index, so we extract it as such.
+
+Essentially, this is a voting scheme for the multiclass classification problem.
+In the case of a tie, the smallest index is always chosen, i.e. 1. This is not the best
+strategy, but it is after the following paper:
+
+Chih-Wei Hsu and Chih-Jen Lin (2002) ‘A comparison of methods for multiclass support vector machines’, IEEE Transactions on Neural Networks, 13(2), pp. 416. doi: 10.1109/72.991427.
+
+Where it says the following quote:
+
+> [...] Then we predict is in the class with the largest vote. The
+> voting approach described above is also called the “Max Wins”
+> strategy. In case that two classes have identical votes, though it
+> may not be a good strategy, now we simply select the one with
+> the smaller index. [...]
+"""
+function _predictions_by_votes(x)
+    unique_elements = unique(x) |> sort
+    predictions = zeros(size(x, 2))
+    counts = map(z -> count(==(z), x, dims=1), unique_elements)
+    largest_values = argmax(vcat(counts...), dims=1)
+
+    for (i, l) in enumerate(largest_values)
+        predictions[i] = l[1]
+    end
+
+    return predictions
+end

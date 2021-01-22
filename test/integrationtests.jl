@@ -75,3 +75,17 @@ end
     # Test for correctness
     @test isreal(result)
 end
+
+@testset "Multiclass classification" begin
+    X, y = @load_iris
+    train, test = partition(eachindex(y), 0.6, shuffle=true, rng=30)
+    pipe = @pipeline(Standardizer(), LSSVClassifier(γ=80.0, σ=0.1))
+    mach = MLJBase.machine(pipe, X, y)
+    MLJBase.fit!(mach, rows=train)
+    results = MLJBase.predict(mach, rows=test)
+    acc = MLJBase.accuracy(results, y[test])
+    @show acc
+
+    # Check that it is not NaN, and never zero
+    @test isreal(acc) && acc >= 0.9
+end

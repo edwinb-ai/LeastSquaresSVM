@@ -1,7 +1,13 @@
 using Literate
 
-# ! Convert scripts to markdown using Literate
-files = Dict("example1.jl" => true, "example2.jl" => false, "example3.jl" => true)
+# * If true, the code will be executed by Literate and the output will be captured.
+# * If false, the code will be executed by Documenter as an example block.
+files = Dict(
+    "example1.jl" => true,
+    "example2.jl" => false,
+    "example3.jl" => true,
+    "example4.jl" => true
+)
 
 function lit_to_md(file; execute=false)
     examples_path = joinpath("src", "examples")

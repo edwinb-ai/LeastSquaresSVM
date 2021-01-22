@@ -17,7 +17,8 @@ makedocs(;
         "Examples" => [
             "example1.md",
             "example2.md",
-            "example3.md"
+            "example3.md",
+            "example4.md"
         ],
         "Reference" => "reference.md",
     ]

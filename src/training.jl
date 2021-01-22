@@ -65,6 +65,68 @@ function svmpredict(svm::LSSVC, fits, xnew::AbstractMatrix)
     return sign.(result)
 end
 
+function svmtrain_mc(svm::LSSVC, x, y, nclass)
+    num_classifiers = nclass * (nclass - 1) / 2
+    # Create a collection to store the learned parameters
+    class_parameters = Vector{Tuple}(undef, Int(num_classifiers))
+    # Create a collection to store the class pairs
+    class_pairs = similar(class_parameters)
+    c_idx = 1 # For keeping track of the classifiers
+
+    for idx = 1:nclass - 1
+        # Get the elements and indices for the first class
+        a_class, a_idxs = _find_and_copy(idx, y)
+        a_class .= 1.0 # The first class is encoded as 1.0
+        for jdx = (idx + 1):nclass
+            # Get the elements and indices for the second class
+            b_class, b_idxs = _find_and_copy(jdx, y)
+            b_class .= -1.0 # The second class is encoded as -1.0
+
+            # Train a binary classification problem with the first and second classes
+            all_indxs = vcat(a_idxs, b_idxs) # Join all indices
+            all_classes = vcat(a_class, b_class) # Join both classes
+
+            # Always copy the model and use views for the samples
+            samples = @view(x[:, all_indxs])
+            # Solve the binary classification problem between classes idx and jdx
+            new_svm = deepcopy(svm)
+            fits = svmtrain(new_svm, samples, all_classes)
+
+            # We save the parameters of that classifier
+            class_parameters[c_idx] = fits
+            # We save the class pairs for decoding them later
+            class_pairs[c_idx] = (idx, jdx)
+            c_idx += 1
+        end
+    end
+
+    return (deepcopy(svm), class_parameters, class_pairs)
+end
+
+function svmpredict_mc(fits, Xnew::AbstractMatrix)
+    # Extract the model, parameters and class codes
+    svm, params, pairs = fits
+    nclass = length(pairs) # The third element are the class pairs
+    # This will hold all the predictions for the classifiers
+    pooled_predictions = Matrix{eltype(Xnew)}(undef, nclass, size(Xnew, 2))
+
+    for (idx, p, s) in zip(1:nclass, params, pairs)
+        # For prediction, we just need the fitted parameters
+        prediction = svmpredict(svm, p, Xnew)
+
+        # Now that we have predictions, decode them using the class pairs
+        broadcast!(x -> x == 1.0 ? s[1] : s[2], prediction, prediction)
+
+        # Save the decoded predictions to our pooling collection
+        pooled_predictions[idx, :] = prediction
+    end
+
+    # Apply the voting scheme
+    results = _predictions_by_votes(pooled_predictions)
+
+    return results
+end
+
 """
     svmtrain(svm::LSSVR, x::AbstractMatrix, y::AbstractVector) -> Tuple
 
