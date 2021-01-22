@@ -2,22 +2,21 @@ using MLJ, MLJBase
 using Random
 using Elysivm
 
-rng = MersenneTwister(951)
+rng = MersenneTwister(953)
 
 X, y = @load_iris
 train, test = partition(eachindex(y), 0.6, shuffle=true, rng=rng)
 model = LSSVClassifier()
-r1 = range(model, :σ, lower=1, upper=20)
-r2 = range(model, :γ, lower=1, upper=1000)
+r1 = range(model, :σ, lower=1e-3, upper=5e-3)
+r2 = range(model, :γ, lower=140, upper=150)
 self_tuning_model = TunedModel(
     model=model,
-    # tuning=Grid(goal=400, rng=rng),
-    tuning=RandomSearch(),
+    tuning=Grid(goal=400, rng=rng),
     resampling=StratifiedCV(nfolds=5),
     range=[r1, r2],
     measure=accuracy,
     acceleration=CPUThreads(),
-    n=500
+    repeats=10 # Add more resampling to be sure we are not biased
 )
 pipe = @pipeline(Standardizer(), self_tuning_model)
 mach = MLJ.machine(pipe, X, y)
