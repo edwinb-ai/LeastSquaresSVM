@@ -73,7 +73,7 @@ function svmtrain_mc(svm::LSSVC, x, y, nclass)
     class_pairs = similar(class_parameters)
     c_idx = 1 # For keeping track of the classifiers
 
-    for idx = 1:nclass-1
+    for idx = 1:nclass - 1
         # Get the elements and indices for the first class
         a_class, a_idxs = _find_and_copy(idx, y)
         a_class .= 1.0 # The first class is encoded as 1.0

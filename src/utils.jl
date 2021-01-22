@@ -114,7 +114,7 @@ Where it says the following quote:
 function _predictions_by_votes(x)
     unique_elements = unique(x) |> sort
     predictions = zeros(size(x, 2))
-    counts = map(z->count(==(z), x, dims=1), unique_elements)
+    counts = map(z -> count(==(z), x, dims=1), unique_elements)
     largest_values = argmax(vcat(counts...), dims=1)
 
     for (i, l) in enumerate(largest_values)
