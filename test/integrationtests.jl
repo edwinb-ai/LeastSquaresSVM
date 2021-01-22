@@ -87,5 +87,5 @@ end
     @show acc
 
     # Check that it is not NaN, and never zero
-    @test isreal(acc) && acc > 0.0
+    @test isreal(acc) && acc >= 0.9
 end

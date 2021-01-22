@@ -73,13 +73,13 @@ function svmtrain_mc(svm::LSSVC, x, y, nclass)
     class_pairs = similar(class_parameters)
     c_idx = 1 # For keeping track of the classifiers
 
-    for idx in 1:nclass-1
+    for idx = 1:nclass-1
         # Get the elements and indices for the first class
         a_class, a_idxs = _find_and_copy(idx, y)
         a_class .= 1.0 # The first class is encoded as 1.0
-        for jdx in (idx + 1):nclass
+        for jdx = (idx + 1):nclass
             # Get the elements and indices for the second class
-            b_class, b_idxs = _find_and_copy(idx, y)
+            b_class, b_idxs = _find_and_copy(jdx, y)
             b_class .= -1.0 # The second class is encoded as -1.0
 
             # Train a binary classification problem with the first and second classes
@@ -89,8 +89,8 @@ function svmtrain_mc(svm::LSSVC, x, y, nclass)
             # Always copy the model and use views for the samples
             samples = @view(x[:, all_indxs])
             # Solve the binary classification problem between classes idx and jdx
-            # new_svm = deepcopy(svm)
-            fits = svmtrain(deepcopy(svm), samples, all_classes)
+            new_svm = deepcopy(svm)
+            fits = svmtrain(new_svm, samples, all_classes)
 
             # We save the parameters of that classifier
             class_parameters[c_idx] = fits
@@ -114,7 +114,7 @@ function svmpredict_mc(fits, Xnew::AbstractMatrix)
         # For prediction, we just need the fitted parameters
         prediction = svmpredict(svm, p, Xnew)
 
-        # Now that we have prediction, decode them using the class pairs
+        # Now that we have predictions, decode them using the class pairs
         broadcast!(x -> x == 1.0 ? s[1] : s[2], prediction, prediction)
 
         # Save the decoded predictions to our pooling collection
