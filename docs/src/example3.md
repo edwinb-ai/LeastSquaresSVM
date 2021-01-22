@@ -19,7 +19,7 @@ using CategoricalArrays, Random
 using Plots
 gr();
 rng = MersenneTwister(812);
-nothing #hide
+
 ```
 
 For this example, we will create a large classification problem. It is actually
@@ -35,7 +35,7 @@ as being a good use case or rule of thumb
 
 ```julia
 X, y = MLJ.make_blobs(500, 2_000; centers=2, cluster_std=[1.5, 0.5]);
-nothing #hide
+
 ```
 
 Of course, this is just to showcase the implementation within `Elysivm`. There are
@@ -53,14 +53,14 @@ as well as a better integration with `MLJ`.
 ```julia
 df = DataFrame(X);
 df.y = y;
-nothing #hide
+
 ```
 
 Recall that we need to change the primitive types of `Julia` to `scitypes`.
 
 ```julia
 dfnew = coerce(df, autotype(df));
-nothing #hide
+
 ```
 
 We can then observe the first three columns, together with their new types.
@@ -76,9 +76,9 @@ first(dfnew[:, 1:8], 3) |> pretty
 │ Float64    │ Float64    │ Float64    │ Float64    │ Float64    │ Float64    │ Float64    │ Float64    │
 │ Continuous │ Continuous │ Continuous │ Continuous │ Continuous │ Continuous │ Continuous │ Continuous │
 ├────────────┼────────────┼────────────┼────────────┼────────────┼────────────┼────────────┼────────────┤
-│ 5.12704    │ -9.98518   │ -8.96596   │ -6.89544   │ 8.78269    │ -6.01066   │ 1.02024    │ -4.45799   │
-│ 4.09653    │ -7.11036   │ -9.69289   │ -9.51762   │ 10.5928    │ -7.75002   │ 3.13547    │ -5.98343   │
-│ 3.4833     │ -1.28194   │ -0.462357  │ -1.45922   │ 9.11409    │ -7.93188   │ 0.786422   │ 2.18396    │
+│ -10.3053   │ -2.27989   │ 11.7529    │ -9.74185   │ 3.43851    │ -10.5602   │ 0.290934   │ 2.28495    │
+│ -7.50539   │ -8.56377   │ -2.21776   │ -3.74827   │ 4.0755     │ -9.15523   │ 3.60088    │ 1.5634     │
+│ -9.95318   │ -2.20408   │ 10.8847    │ -6.44673   │ 6.39259    │ -8.22593   │ 1.3607     │ 0.998584   │
 └────────────┴────────────┴────────────┴────────────┴────────────┴────────────┴────────────┴────────────┘
 
 ```
@@ -95,16 +95,16 @@ describe(dfnew[1:20, 1:10], :mean, :std, :eltype)
  Row │ variable  mean      std      eltype
      │ Symbol    Float64   Float64  DataType
 ─────┼───────────────────────────────────────
-   1 │ x1         4.14381  1.05422  Float64
-   2 │ x2        -5.34686  3.42313  Float64
-   3 │ x3        -5.44937  3.76329  Float64
-   4 │ x4        -5.09043  3.26153  Float64
-   5 │ x5         9.25206  1.12519  Float64
-   6 │ x6        -8.78989  1.1383   Float64
-   7 │ x7         1.93638  1.02246  Float64
-   8 │ x8        -1.69998  3.82687  Float64
-   9 │ x9        -7.03241  1.24312  Float64
-  10 │ x10       -1.03144  7.19685  Float64
+   1 │ x1        -8.31938  1.50217  Float64
+   2 │ x2        -4.41985  3.36826  Float64
+   3 │ x3         4.58826  5.26909  Float64
+   4 │ x4        -7.83962  2.84924  Float64
+   5 │ x5         4.35356  1.17455  Float64
+   6 │ x6        -9.38944  1.18014  Float64
+   7 │ x7         2.43591  1.83128  Float64
+   8 │ x8         2.16018  1.73233  Float64
+   9 │ x9         2.48253  8.26735  Float64
+  10 │ x10       -2.56171  6.64725  Float64
 ```
 
 Recall that we also need to standardize the dataset, we can see here that the mean is
@@ -115,7 +115,7 @@ Split the dataset into training and testing sets.
 ```julia
 y, X = unpack(dfnew, ==(:y), colname -> true);
 train, test = partition(eachindex(y), 0.75, shuffle=true, rng=rng);
-nothing #hide
+
 ```
 
 In this document, we will use a _pipeline_ to integrate both the standardization and
@@ -149,7 +149,7 @@ self_tuning_model = TunedModel(
     measure=accuracy,
     acceleration=CPUThreads(), # We use this to enable multithreading
 );
-nothing #hide
+
 ```
 
 Then, we will build the pipeline. The first step is to standardize the inputs and then
@@ -157,7 +157,7 @@ pass it to the classifier.
 
 ```julia
 pipe = @pipeline(Standardizer(), self_tuning_model);
-nothing #hide
+
 ```
 
 !!! warning
@@ -181,7 +181,7 @@ LSSVClassifier(
     kernel = :linear,
     γ = 1.0,
     σ = 283.9248120300752,
-    degree = 0)[34m @074[39m
+    degree = 0)[34m @013[39m
 ```
 
 Having found the best hyperparameters for the regressor model we proceed to check how
@@ -195,7 +195,7 @@ result
 ```
 
 ```
-0.992
+1.0
 ```
 
 We can see that we did quite well. A value of 1, or close enough, means the classifier
@@ -220,9 +220,9 @@ confusion_matrix(ŷ, y_ordered)
 ┌─────────────┼─────────────┬─────────────┤
 │  Predicted  │      1      │      2      │
 ├─────────────┼─────────────┼─────────────┤
-│      1      │     70      │      0      │
+│      1      │     62      │      0      │
 ├─────────────┼─────────────┼─────────────┤
-│      2      │      1      │     54      │
+│      2      │      0      │     63      │
 └─────────────┴─────────────┴─────────────┘
 
 ```
