@@ -154,7 +154,7 @@ nothing #hide
 ```
 
 ```
-┌ Info: Training [34mMachine{Standardizer} @007[39m.
+┌ Info: Training [34mMachine{Standardizer} @476[39m.
 └ @ MLJBase /home/edwin/.julia/packages/MLJBase/5TNcr/src/machines.jl:319
 
 ```
@@ -243,7 +243,7 @@ LSSVClassifier(
     kernel = :rbf,
     γ = 0.01,
     σ = 0.5,
-    degree = 0)[34m @261[39m
+    degree = 0)[34m @064[39m
 ```
 
 And we test the trained model. We expect somewhere around 94%-96% accuracy.

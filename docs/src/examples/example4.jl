@@ -6,8 +6,8 @@
 #
 # - For a classification problem with ``k`` classes, one trains ``k(k-1)/2`` binary classifiers.
 # - Each binary classifier deals with every possible class pair combination. For instance, for a three class classification problem, we need to train three classifiers. The first will deal with the (1, 2) binary classification problem. The second with the (1, 3), while the third classifier will deal with the (2, 3) class pair.
-# - We then save all these parameters, and on the prediction step, we ask each and every classifier to predict a given data instance. Care must be taken to ensure that the class pairs are decoded correctly.
-# - A _voting scheme_ is then applied to these predictions. The class that has the largest number of votes when a pediction is carried out is the class that is taken as the predicted class. In the important case of a tie, the predicted class is always that of the lowest index. This is obviously not a great strategy, but it's simple.
+# - We then save all these parameters, and on the prediction step, we ask every classifier to predict a given data instance. Care must be taken to ensure that the class pairs are decoded correctly.
+# - A _voting scheme_ is then applied to these predictions. The class that has the largest number of votes when a pediction is carried out is the class that is taken as the predicted class. In the important case of a tie, the predicted class is always that of the lowest index. This is obviously not a great strategy, but it's simple enough to break the tie. See[^1] to read more about this strategy.
 #
 # Here, we deal with the binary classification problems with the underlying implementation
 # of the `LSSVClassifier` and finally pool all of our results together. We then apply
@@ -18,11 +18,10 @@
 #
 # This problem is a 3-class classification problem, with 4 features and a total of 150
 # samples; 50 for each class.
-# It is expected that with good hyperparameters set, our implementation should easily
-# obtain a 100% accuracy classification rate.
+# It is expected that with a good set of hyperparameters, our implementation should easily
+# obtain a 100% accuracy classification rate on this problem.
 #
-# Let us begin by importing our packages and creating setting an RNG to ensure
-# reproducibility.
+# Let us begin by importing our packages and setting an RNG to ensure reproducibility.
 #
 using MLJ, MLJBase
 using Random
@@ -78,7 +77,7 @@ acc
 # As a good measure, let us inspect the confusion matrix of the classification problem.
 results = coerce(results, OrderedFactor);
 y_ordered = coerce(y[test], OrderedFactor);
-confusion_matrix(results, y_ordered) |> display
+confusion_matrix(results, y_ordered)
 
 # ## Conclusions
 #
@@ -88,4 +87,6 @@ confusion_matrix(results, y_ordered) |> display
 #
 # As a good rule of thumb, when doing machine learning, always try to train _at least_
 # one more model to compare performance.
+#
+# [^1]: Chih-Wei Hsu and Chih-Jen Lin (2002) ‘A comparison of methods for multiclass support vector machines’, IEEE Transactions on Neural Networks, 13(2), pp. 416. doi: 10.1109/72.991427.
 #
