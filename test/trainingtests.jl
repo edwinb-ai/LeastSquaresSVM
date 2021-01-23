@@ -42,3 +42,27 @@ end
     result = svmpredict(svr, fitted, X_test)
     @test isapprox(result, y_test)
 end
+
+function train_and_predict(x, xtest, y, kernel, deg)
+    svm = LSSVC(; kernel=kernel, degree=deg)
+    fitted = svmtrain(svm, x, y)
+    result = svmpredict(svm, fitted, xtest)
+
+    return result
+end
+
+@testset "Kernels" begin
+    # * Setup the problem
+    x = [[0.0, 0.0] [1.0, 1.0]]
+    y = [-1.0, 1.0]
+    kernels = Dict(:linear => 1, :poly => 2)
+
+    x_test = [2.0, 2.0]
+    x_test = reshape(x_test, 2, :)
+    true_result = [1.0]
+
+    for (k, v) in kernels
+        result = train_and_predict(x, x_test, y, k, v)
+        @test all(result .== true_result)
+    end
+end

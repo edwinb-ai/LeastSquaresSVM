@@ -1,6 +1,5 @@
 using DataFrames, CSV
 using CategoricalArrays
-import Elysivm
 
 @testset "MLJ Integration Classification" begin
     # ============== Problem setup ============ #
@@ -35,10 +34,8 @@ import Elysivm
     stand1 = Standardizer(count=true)
     X = MLJBase.transform(MLJBase.fit!(MLJBase.machine(stand1, X)), X)
 
-
-
     # Define a good set of hyperparameters for this problem
-    model = Elysivm.LSSVClassifier(γ=80.0, σ=0.233333)
+    model = LSSVClassifier(γ=80.0, σ=0.233333)
     mach = MLJ.machine(model, X, y)
     MLJBase.fit!(mach, rows=train)
 
@@ -67,7 +64,7 @@ end
     display(describe(X |> DataFrame, :mean, :std, :eltype))
 
     # Define a good set of hyperparameters for this problem
-    model = Elysivm.LSSVRegressor(γ=10.0, σ=0.5)
+    model = LSSVRegressor(γ=10.0, σ=0.5)
     mach = MLJ.machine(model, X, y)
     MLJBase.fit!(mach, rows=train)
 
@@ -77,4 +74,18 @@ end
 
     # Test for correctness
     @test isreal(result)
+end
+
+@testset "Multiclass classification" begin
+    X, y = @load_iris
+    train, test = partition(eachindex(y), 0.6, shuffle=true, rng=30)
+    pipe = @pipeline(Standardizer(), LSSVClassifier(γ=80.0, σ=0.1))
+    mach = MLJBase.machine(pipe, X, y)
+    MLJBase.fit!(mach, rows=train)
+    results = MLJBase.predict(mach, rows=test)
+    acc = MLJBase.accuracy(results, y[test])
+    @show acc
+
+    # Check that it is not NaN, and never zero
+    @test isreal(acc) && acc >= 0.9
 end

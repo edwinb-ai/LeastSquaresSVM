@@ -1,19 +1,18 @@
 module Elysivm
 
 using LinearAlgebra
-using Distances
+using KernelFunctions
 using Krylov
 import MLJModelInterface
 
 const MMI = MLJModelInterface
 
+export SVM, LSSVC, LSSVR, KernelRBF, svmtrain, svmtrain_mc, svmpredict, LSSVClassifier,
+LSSVRegressor
+
 include("types.jl")
-export LSSVC, LSSVR, KernelRBF
-
+include("utils.jl")
 include("training.jl")
-export svmtrain, build_omega, svmpredict
-
 include("mlj_interface.jl")
-export LSSVClassifier, LSSVRegressor
 
 end
