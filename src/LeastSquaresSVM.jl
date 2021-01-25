@@ -1,4 +1,4 @@
-module Elysivm
+module LeastSquaresSVM
 
 using LinearAlgebra
 using KernelFunctions

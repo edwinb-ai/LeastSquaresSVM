@@ -25,7 +25,7 @@
 #
 using MLJ, MLJBase
 using Random
-using Elysivm
+using LeastSquaresSVM
 
 rng = MersenneTwister(957);
 

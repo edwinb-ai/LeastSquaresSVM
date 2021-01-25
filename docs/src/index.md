@@ -1,10 +1,10 @@
 ```@meta
-CurrentModule = Elysivm
+CurrentModule = LeastSquaresSVM
 ```
 
-# Elysivm
+# LeastSquaresSVM
 
-This is `Elysivm`, a Least Squares Support Vector Machine (LSSVM) implementation in pure Julia.
+This is `LeastSquaresSVM`, a Least Squares Support Vector Machine (LSSVM) implementation in pure Julia.
 It is meant to be used together with the fantastic [MLJ.jl](https://alan-turing-institute.github.io/MLJ.jl/dev/)
 Machine Learning framework.
 
@@ -14,7 +14,7 @@ It is a re-formulation of the classical Support Vector Machine (SVM) formalism. 
 to solve a least squares problem which is faster[^1], instead of the classic quadratic, convex optimization problem
 that is solved in the original Support Vector Machine.
 
-In the case of `Elysivm` we use the conjugate gradient method, in particular the Lanczos version[^2] due to the fact
+In the case of `LeastSquaresSVM` we use the conjugate gradient method, in particular the Lanczos version[^2] due to the fact
 that we solve several linear systems which have the the following structure
 
 ```math
@@ -29,7 +29,7 @@ very fast, iterative procedure based on Krylov subspace methods. The implementat
 
 # Rationale
 
-SVM has been the most known and used formulation, but here are some pros and cons for using LSSVMs and `Elysivm`.
+SVM has been the most known and used formulation, but here are some pros and cons for using LSSVMs and `LeastSquaresSVM`.
 
 ## Advantages
 

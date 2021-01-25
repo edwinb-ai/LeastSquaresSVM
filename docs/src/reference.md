@@ -2,14 +2,14 @@
 
 ## Types
 ```@autodocs
-Modules = [Elysivm]
+Modules = [LeastSquaresSVM]
 Pages = ["types.jl"]
 Private = false
 ```
 
 ## Methods
 ```@autodocs
-Modules = [Elysivm]
+Modules = [LeastSquaresSVM]
 Pages = ["training.jl"]
 Private = false
 ```

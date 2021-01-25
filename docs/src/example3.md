@@ -12,7 +12,7 @@ showcase an example.
 First, we need to import all the necessary packages.
 
 ```julia
-using Elysivm
+using LeastSquaresSVM
 using MLJ, MLJBase
 using DataFrames, CSV
 using CategoricalArrays, Random
@@ -38,7 +38,7 @@ X, y = MLJ.make_blobs(500, 2_000; centers=2, cluster_std=[1.5, 0.5]);
 
 ```
 
-Of course, this is just to showcase the implementation within `Elysivm`. There are
+Of course, this is just to showcase the implementation within `LeastSquaresSVM`. There are
 actually better ways to handle this kind of problem, e.g. dimensionality-reduction
 algorithms.
 
