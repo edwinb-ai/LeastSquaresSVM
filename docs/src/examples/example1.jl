@@ -10,7 +10,7 @@
 # answer a simple question:
 # > Does the subject have a benign or malign tumor?
 # To answer this question, we will train a Least Squares Support Vector Machine as
-# implemented in `Elysivm`.
+# implemented in `LeastSquaresSVM`.
 #
 # First, we need to import all the necessary packages.
 
@@ -18,7 +18,7 @@ using MLJ, MLJBase
 using DataFrames, CSV
 using CategoricalArrays
 using Random, Statistics
-using Elysivm
+using LeastSquaresSVM
 
 # We then need to specify a seed to enable reproducibility of the results.
 rng = MersenneTwister(801239);
@@ -75,8 +75,8 @@ describe(X)
 # Good, now every column has a mean very close to zero, so the standardization was
 # done correctly.
 
-# We now create our model with `Elysivm`
-model = Elysivm.LSSVClassifier();
+# We now create our model with `LeastSquaresSVM`
+model = LeastSquaresSVM.LSSVClassifier();
 
 # These are the values for the hyperparameter grid search. We need to find the best subset
 # from this set of parameters.
@@ -117,6 +117,6 @@ acc = accuracy(results, y[test]);
 # Show the accuracy for the testing set
 println(acc * 100.0)
 
-# As you can see, it is fairly easy to use `Elysivm` together with MLJ. We got a good
+# As you can see, it is fairly easy to use `LeastSquaresSVM` together with MLJ. We got a good
 # accuracy result and this proves that the implementation is actually correct. This
 # dataset is commonly used as a benchmark dataset to test new algorithms.

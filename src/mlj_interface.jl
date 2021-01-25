@@ -106,9 +106,9 @@ end
 const LSSVM = (LSSVC, LSSVR)
 
 MMI.metadata_pkg.(LSSVM,
-    name="Elysivm",
+    name="LeastSquaresSVM",
     uuid="6bfd0e71-701c-47cd-9c90-5bf8fe84640d",
-    url="https://github.com/edwinb-ai/Elysivm",
+    url="https://github.com/edwinb-ai/LeastSquaresSVM",
     julia=true,
     license="MIT",
     is_wrapper=false)
@@ -118,7 +118,7 @@ MMI.metadata_model(LSSVC,
     target=AbstractVector{MMI.Finite},
     weights=false,
     descr="A Least Squares Support Vector Classifier implementation.",
-    path="Elysivm.LSSVC",
+    path="LeastSquaresSVM.LSSVC",
 )
 
 MMI.metadata_model(LSSVR,
@@ -126,5 +126,5 @@ MMI.metadata_model(LSSVR,
     target=AbstractVector{MMI.Continuous},
     weights=false,
     descr="A Least Squares Support Vector Regressor implementation.",
-    path="Elysivm.LSSVR",
+    path="LeastSquaresSVM.LSSVR",
 )

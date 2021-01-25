@@ -1,15 +1,15 @@
-using Elysivm
+using LeastSquaresSVM
 using Documenter
 
 # * Build the complete documentation
 makedocs(;
-    modules=[Elysivm],
+    modules=[LeastSquaresSVM],
     authors="Edwin Bedolla",
-    repo="https://github.com/edwinb-ai/Elysivm/blob/{commit}{path}#L{line}",
-    sitename="Elysivm",
+    repo="https://github.com/edwinb-ai/LeastSquaresSVM/blob/{commit}{path}#L{line}",
+    sitename="LeastSquaresSVM",
     format=Documenter.HTML(;
         prettyurls=get(ENV, "CI", "false") == "true",
-        canonical="https://edwinb-ai.github.io/Elysivm/stable/",
+        canonical="https://edwinb-ai.github.io/LeastSquaresSVM/stable/",
         assets=String[]
     ),
     pages=[
@@ -25,7 +25,7 @@ makedocs(;
 )
 
 deploydocs(;
-    repo="github.com/edwinb-ai/Elysivm.git",
+    repo="github.com/edwinb-ai/LeastSquaresSVM.git",
     devbranch="main",
     push_preview=true
 )

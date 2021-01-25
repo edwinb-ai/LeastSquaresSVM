@@ -30,7 +30,7 @@ Let us begin by importing our packages and setting an RNG to ensure reproducibil
 ```julia
 using MLJ, MLJBase
 using Random
-using Elysivm
+using LeastSquaresSVM
 
 rng = MersenneTwister(957);
 

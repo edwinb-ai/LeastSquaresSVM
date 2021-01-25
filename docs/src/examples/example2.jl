@@ -1,11 +1,11 @@
 # # Regression on a synthetic dataset
 #
 # In this page we will see how to perform Least Squares Support Vector Regression using
-# `Elysivm`. To accomplish this task, we will use synthetic data as created by the
+# `LeastSquaresSVM`. To accomplish this task, we will use synthetic data as created by the
 # `make_regression` function from `MLJ`.
 #
 # First, we need to import all the necessary packages.
-using Elysivm
+using LeastSquaresSVM
 using MLJ, MLJBase
 using DataFrames, CSV
 using CategoricalArrays, Random
@@ -62,7 +62,7 @@ describe(X |> DataFrame, :mean, :std, :eltype)
 # ```
 #
 # where we define $\hat{y}_i$ as the *predicted value*, and $y_i$ as the real value.
-model = Elysivm.LSSVRegressor();
+model = LeastSquaresSVM.LSSVRegressor();
 r1 = MLJBase.range(model, :σ, lower=7e-4, upper=1e-3);
 r2 = MLJBase.range(model, :γ, lower=120.0, upper=130.0);
 self_tuning_model = TunedModel(
