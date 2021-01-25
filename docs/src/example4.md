@@ -107,7 +107,7 @@ LSSVClassifier(
     kernel = :rbf,
     γ = 147.69230769230768,
     σ = 0.01,
-    degree = 0)[34m @433[39m
+    degree = 0)[34m @315[39m
 ```
 
 Great! Let us see how good was the model. Let's check with the test set.

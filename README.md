@@ -7,15 +7,6 @@
 This is an implementation in pure `Julia` of the Least Squares Support Vector Machines [1] by Suykens and Vandewalle.
 It contains both a **classifier** and a **regressor** implementation.
 
-# MLJ Integration
-
-It has been designed to be used with the fantastic [MLJ.jl](https://alan-turing-institute.github.io/MLJ.jl/dev/) Machine Learning framework.
-
-# How to use it
-
-It follows the same logic as the workflow endorsed by MLJ, with the only exception that the models here are based on Least Squares Support Vector Machines. If you need some guidance, check out the documentation where there are a couple of examples.
-
-
 # Installation
 
 You install this package from `Pkg` like so
