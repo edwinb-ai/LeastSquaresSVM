@@ -32,15 +32,15 @@ using CategoricalArrays
     y, X = unpack(data, ==(:class), colname -> true)
     train, test = partition(eachindex(y), 2 / 3, shuffle=true, rng=15)
     stand1 = Standardizer(count=true)
-    X = MLJBase.transform(MLJBase.fit!(MLJBase.machine(stand1, X)), X)
+    X = MLJ.transform(MLJ.fit!(MLJ.machine(stand1, X)), X)
 
     # Define a good set of hyperparameters for this problem
     model = LSSVClassifier(γ=80.0, σ=0.233333)
     mach = MLJ.machine(model, X, y)
-    MLJBase.fit!(mach, rows=train)
+    MLJ.fit!(mach, rows=train)
 
-    results = MLJBase.predict(mach, rows=test)
-    acc = MLJBase.accuracy(results, y[test])
+    results = MLJ.predict(mach, rows=test)
+    acc = MLJ.accuracy(results, y[test])
     display(acc)
 
     # Test for correctness
@@ -60,16 +60,16 @@ end
     y, X = unpack(dfnew, ==(:y), colname -> true)
     train, test = partition(eachindex(y), 0.75, shuffle=true, rng=20)
     stand1 = Standardizer()
-    X = MLJBase.transform(MLJBase.fit!(MLJBase.machine(stand1, X)), X)
+    X = MLJ.transform(MLJ.fit!(MLJ.machine(stand1, X)), X)
     display(describe(X |> DataFrame, :mean, :std, :eltype))
 
     # Define a good set of hyperparameters for this problem
     model = LSSVRegressor(γ=10.0, σ=0.5)
     mach = MLJ.machine(model, X, y)
-    MLJBase.fit!(mach, rows=train)
+    MLJ.fit!(mach, rows=train)
 
-    ŷ = MLJBase.predict(mach, rows=test)
-    result = round(MLJBase.rms(ŷ, y[test]), sigdigits=4)
+    ŷ = MLJ.predict(mach, rows=test)
+    result = round(MLJ.rms(ŷ, y[test]), sigdigits=4)
     display(result)
 
     # Test for correctness
@@ -80,10 +80,10 @@ end
     X, y = @load_iris
     train, test = partition(eachindex(y), 0.6, shuffle=true, rng=30)
     pipe = @pipeline(Standardizer(), LSSVClassifier(γ=80.0, σ=0.1))
-    mach = MLJBase.machine(pipe, X, y)
-    MLJBase.fit!(mach, rows=train)
-    results = MLJBase.predict(mach, rows=test)
-    acc = MLJBase.accuracy(results, y[test])
+    mach = MLJ.machine(pipe, X, y)
+    MLJ.fit!(mach, rows=train)
+    results = MLJ.predict(mach, rows=test)
+    acc = MLJ.accuracy(results, y[test])
     @show acc
 
     # Check that it is not NaN, and never zero
