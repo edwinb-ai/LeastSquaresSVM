@@ -31,17 +31,14 @@ using CategoricalArrays
     # Split the training and test data
     y, X = unpack(data, ==(:class), colname -> true)
     train, test = partition(eachindex(y), 2 / 3, shuffle=true, rng=15)
-    stand1 = Standardizer(count=true)
-    X = MLJBase.transform(MLJBase.fit!(MLJBase.machine(stand1, X)), X)
 
     # Define a good set of hyperparameters for this problem
-    model = LSSVClassifier(γ=80.0, σ=0.233333)
-    mach = MLJ.machine(model, X, y)
-    MLJBase.fit!(mach, rows=train)
+    pipe = MLJ.@pipeline(Standardizer(count=true), LSSVClassifier(γ=80.0, σ=0.233333))
+    mach = MLJ.machine(pipe, X, y)
+    MLJ.fit!(mach, rows=train, verbosity=0)
 
-    results = MLJBase.predict(mach, rows=test)
-    acc = MLJBase.accuracy(results, y[test])
-    display(acc)
+    results = MLJ.predict(mach, rows=test)
+    acc = MLJ.accuracy(results, y[test])
 
     # Test for correctness
     @test isreal(acc)
@@ -54,37 +51,30 @@ end
     df = DataFrame(X)
     df.y = y
     dfnew = coerce(df, autotype(df))
-    display(first(dfnew, 3) |> pretty)
-    display(describe(dfnew, :mean, :std, :eltype))
 
     y, X = unpack(dfnew, ==(:y), colname -> true)
     train, test = partition(eachindex(y), 0.75, shuffle=true, rng=20)
-    stand1 = Standardizer()
-    X = MLJBase.transform(MLJBase.fit!(MLJBase.machine(stand1, X)), X)
-    display(describe(X |> DataFrame, :mean, :std, :eltype))
 
     # Define a good set of hyperparameters for this problem
-    model = LSSVRegressor(γ=10.0, σ=0.5)
+    model = MLJ.@pipeline(Standardizer(), LSSVRegressor(γ=10.0, σ=0.5))
     mach = MLJ.machine(model, X, y)
-    MLJBase.fit!(mach, rows=train)
+    MLJ.fit!(mach, rows=train, verbosity=0)
 
-    ŷ = MLJBase.predict(mach, rows=test)
-    result = round(MLJBase.rms(ŷ, y[test]), sigdigits=4)
-    display(result)
+    ŷ = MLJ.predict(mach, rows=test)
+    result = round(MLJ.rms(ŷ, y[test]), sigdigits=4)
 
     # Test for correctness
     @test isreal(result)
 end
 
 @testset "Multiclass classification" begin
-    X, y = @load_iris
+    X, y = MLJ.@load_iris
     train, test = partition(eachindex(y), 0.6, shuffle=true, rng=30)
-    pipe = @pipeline(Standardizer(), LSSVClassifier(γ=80.0, σ=0.1))
-    mach = MLJBase.machine(pipe, X, y)
-    MLJBase.fit!(mach, rows=train)
-    results = MLJBase.predict(mach, rows=test)
-    acc = MLJBase.accuracy(results, y[test])
-    @show acc
+    pipe = MLJ.@pipeline(Standardizer(), LSSVClassifier(γ=80.0, σ=0.1))
+    mach = MLJ.machine(pipe, X, y)
+    MLJ.fit!(mach, rows=train, verbosity=0)
+    results = MLJ.predict(mach, rows=test)
+    acc = MLJ.accuracy(results, y[test])
 
     # Check that it is not NaN, and never zero
     @test isreal(acc) && acc >= 0.9

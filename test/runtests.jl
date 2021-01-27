@@ -1,6 +1,6 @@
 using LeastSquaresSVM
 using Test
-using MLJBase, MLJ, MLJModels
+using MLJ
 
 @testset "LeastSquaresSVM.jl" begin
     include("typetests.jl")
