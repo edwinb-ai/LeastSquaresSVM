@@ -145,10 +145,10 @@ version = "2.8.0"
 uuid = "56ddb016-857b-54e1-b83d-db4d58db5568"
 
 [[MLJModelInterface]]
-deps = ["Random", "ScientificTypes", "StatisticalTraits"]
-git-tree-sha1 = "80f51f8c0867834b338bbc1a2a0fc80e70794a85"
+deps = ["Random", "ScientificTypes"]
+git-tree-sha1 = "dc9af7178bdbe2619623be56fc127fe8b0d30c78"
 uuid = "e80e1ace-859a-464e-9ed9-23947d8ae3ea"
-version = "0.4.0"
+version = "0.3.8"
 
 [[MacroTools]]
 deps = ["Markdown", "Random"]
@@ -258,12 +258,6 @@ deps = ["ChainRulesCore", "OpenSpecFun_jll"]
 git-tree-sha1 = "75394dbe2bd346beeed750fb02baa6445487b862"
 uuid = "276daf66-3868-5448-9aa4-cd146d93841b"
 version = "1.2.1"
-
-[[StatisticalTraits]]
-deps = ["ScientificTypes"]
-git-tree-sha1 = "1696c6f7af1247ab04a89beb57e2d35161859a67"
-uuid = "64bff920-2084-43da-a3e6-9bb72801c0c9"
-version = "0.1.0"
 
 [[Statistics]]
 deps = ["LinearAlgebra", "SparseArrays"]

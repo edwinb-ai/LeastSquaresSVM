@@ -3,6 +3,7 @@ module LeastSquaresSVM
 using LinearAlgebra
 using KernelFunctions
 using Krylov
+using Tullio
 import MLJModelInterface
 
 const MMI = MLJModelInterface
@@ -12,6 +13,7 @@ LSSVRegressor
 
 include("types.jl")
 include("utils.jl")
+include("tools.jl")
 include("training.jl")
 include("mlj_interface.jl")
 

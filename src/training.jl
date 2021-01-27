@@ -21,8 +21,11 @@ function svmtrain(svm::LSSVC, x::AbstractMatrix, y::AbstractVector)
     kwargs = _kwargs2dict(svm)
     # We build the kernel matrix and the omega matrix
     kern_mat = _build_kernel_matrix(x; kwargs...)
-    Ω = (y .* y') .* kern_mat
-    H = Ω + I / svm.γ
+    y_external = extern_prod(y, y)
+    pairwise_mul!(kern_mat, y_external)
+    # Ω = (y .* y') .* kern_mat
+    # H = Ω + I / svm.γ
+    H = kern_mat + I / svm.γ
 
     # * Start solving the subproblems
     # First, solve for eta
