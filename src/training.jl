@@ -22,9 +22,8 @@ function svmtrain(svm::LSSVC, x::AbstractMatrix, y::AbstractVector)
     # We build the kernel matrix and the omega matrix
     kern_mat = _build_kernel_matrix(x; kwargs...)
     y_external = extern_prod(y, y)
+    # Mutiply the external product in-place to save memory
     pairwise_mul!(kern_mat, y_external)
-    # Ω = (y .* y') .* kern_mat
-    # H = Ω + I / svm.γ
     H = kern_mat + I / svm.γ
 
     # * Start solving the subproblems
@@ -34,10 +33,11 @@ function svmtrain(svm::LSSVC, x::AbstractMatrix, y::AbstractVector)
     (ν, stats) = cg_lanczos(H, ones(n))
 
     # We then compute s
-    s = dot(y, η)
+    s = BL.dot(n, y, 1, η, 1)
 
     # Finally, we solve the problem for alpha and b
-    b = dot(η, ones(n)) / s
+    b = BL.dot(n, η, 1, ones(n), 1)
+    b /= s
     α = ν .- (η * b)
 
     return (x, y, α, b)

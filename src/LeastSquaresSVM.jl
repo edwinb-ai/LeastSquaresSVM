@@ -7,6 +7,7 @@ using Tullio
 import MLJModelInterface
 
 const MMI = MLJModelInterface
+const BL = LinearAlgebra.BLAS
 
 export SVM, LSSVC, LSSVR, KernelRBF, svmtrain, svmtrain_mc, svmpredict, LSSVClassifier,
 LSSVRegressor
