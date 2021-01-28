@@ -17,5 +17,8 @@ include("utils.jl")
 include("tools.jl")
 include("training.jl")
 include("mlj_interface.jl")
+# Some precompilation for the Tullio tools
+include("precompile.jl")
+_precompile_tullio()
 
 end

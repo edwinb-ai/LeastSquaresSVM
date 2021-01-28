@@ -127,7 +127,4 @@ end
 """
     To test whether a solver from Krylov.jl solved a given problem successfully.
 """
-function check_if_solved(stat)
-    display(stat)
-    return stat.solved || @warn "A solution was not found!"
-end
+check_if_solved(stat) = stat.solved || @warn "A solution was not found!"
