@@ -40,7 +40,7 @@ function svmtrain(svm::LSSVC, x::AbstractMatrix, y::AbstractVector)
     # Finally, we solve the problem for alpha and b
     b = BL.dot(n, η, 1, ones(n), 1)
     b /= s
-    LinearAlgebra.rmul!(η, b)
+    rmul!(η, b)
     α = pairwise_diff(ν, η)
 
     return (x, y, α, b)
@@ -168,10 +168,14 @@ function svmtrain(svm::LSSVR, x::AbstractMatrix, y::AbstractVector)
 
     # We then compute s
     # s = dot(ones(n), η)
-
+    s = BL.dot(n, ones(n), 1, η, 1)
     # Finally, we solve the problem for alpha and b
-    b = dot(η, y) / s
-    α = ν .- (η * b)
+    # b = dot(η, y)
+    b = BL.dot(n, η, 1, y, 1)
+    b /= s
+    rmul!(η, b)
+    α = pairwise_diff(ν, η)
+    # α = ν .- (η * b)
 
     return (x, α, b)
 end
