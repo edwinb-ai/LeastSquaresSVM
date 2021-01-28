@@ -167,15 +167,12 @@ function svmtrain(svm::LSSVR, x::AbstractMatrix, y::AbstractVector)
     @assert check_if_solved(stats) == true
 
     # We then compute s
-    # s = dot(ones(n), η)
     s = BL.dot(n, ones(n), 1, η, 1)
     # Finally, we solve the problem for alpha and b
-    # b = dot(η, y)
     b = BL.dot(n, η, 1, y, 1)
     b /= s
     rmul!(η, b)
     α = pairwise_diff(ν, η)
-    # α = ν .- (η * b)
 
     return (x, α, b)
 end
