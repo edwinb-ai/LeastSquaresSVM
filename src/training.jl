@@ -63,10 +63,11 @@ function svmpredict(svm::LSSVC, fits, xnew::AbstractMatrix)
     x, y, α, b = fits
     kwargs = _kwargs2dict(svm)
     @assert size(x, 1) == size(xnew, 1)
+    # Build the kernel matrix with new observations
     kern_mat = _build_kernel_matrix(x, xnew; kwargs...)
+    # Compute the decision function
     result = sum(@. kern_mat * y * α; dims=1) .+ b
-    # We need to remove the trailing dimension
-    result = reshape(result, size(result, 2))
+    result = reshape(result, size(result, 2)) # Remove the trailing dimension
 
     return sign.(result)
 end
