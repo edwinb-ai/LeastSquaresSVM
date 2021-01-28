@@ -24,3 +24,5 @@ sum(@. x * y * z; dims=1)
 ```
 """
 prod_reduction(x, y, z) = @tullio w[1, j] := x[i, j] * y[i] * z[i]
+
+prod_reduction(x, y) = @tullio w[1, j] := x[i, j] * y[i]

@@ -95,7 +95,7 @@ function svmtrain_mc(svm::LSSVC, x, y, nclass)
             all_classes = vcat(a_class, b_class) # Join both classes
 
             # Always copy the model and use views for the samples
-            samples = @view(x[:, all_indxs])
+            samples = view(x, :, all_indxs)
             # Solve the binary classification problem between classes idx and jdx
             new_svm = deepcopy(svm)
             fits = svmtrain(new_svm, samples, all_classes)
@@ -200,7 +200,8 @@ function svmpredict(svm::LSSVR, fits, xnew::AbstractMatrix)
 
     kwargs = _kwargs2dict(svm)
     kern_mat = _build_kernel_matrix(x, xnew; kwargs...)
-    result = sum(kern_mat .* α; dims=1) .+ b
+    # result = sum(kern_mat .* α; dims=1) .+ b
+    result = prod_reduction(kern_mat, α) .+ b
 
     # We need to remove the trailing dimension
     result = reshape(result, size(result, 2))
