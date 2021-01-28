@@ -28,9 +28,11 @@ function svmtrain(svm::LSSVC, x::AbstractMatrix, y::AbstractVector)
 
     # * Start solving the subproblems
     # First, solve for eta
-    (η, stats) = cg_lanczos(H, y)
+    η, stats = cg_lanczos(H, y)
+    @assert check_if_solved(stats) == true
     # Then, solve for nu
-    (ν, stats) = cg_lanczos(H, ones(n))
+    ν, stats = cg_lanczos(H, ones(n))
+    @assert check_if_solved(stats) == true
 
     # We then compute s
     s = BL.dot(n, y, 1, η, 1)
@@ -158,12 +160,14 @@ function svmtrain(svm::LSSVR, x::AbstractMatrix, y::AbstractVector)
 
     # * Start solving the subproblems
     # First, solve for eta
-    (η, stats) = cg_lanczos(H, ones(n))
+    η, stats = cg_lanczos(H, ones(n))
+    @assert check_if_solved(stats) == true
     # Then, solve for nu
-    (ν, stats) = cg_lanczos(H, y)
+    ν, stats = cg_lanczos(H, y)
+    @assert check_if_solved(stats) == true
 
     # We then compute s
-    s = dot(ones(n), η)
+    # s = dot(ones(n), η)
 
     # Finally, we solve the problem for alpha and b
     b = dot(η, y) / s
