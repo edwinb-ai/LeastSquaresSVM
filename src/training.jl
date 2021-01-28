@@ -66,7 +66,6 @@ function svmpredict(svm::LSSVC, fits, xnew::AbstractMatrix)
     # Build the kernel matrix with new observations
     kern_mat = _build_kernel_matrix(x, xnew; kwargs...)
     # Compute the decision function
-    # result = sum(@. kern_mat * y * α; dims=1) .+ b
     result = prod_reduction(kern_mat, y, α) .+ b
     result = reshape(result, size(result, 2)) # Remove the trailing dimension
 
@@ -200,7 +199,6 @@ function svmpredict(svm::LSSVR, fits, xnew::AbstractMatrix)
 
     kwargs = _kwargs2dict(svm)
     kern_mat = _build_kernel_matrix(x, xnew; kwargs...)
-    # result = sum(kern_mat .* α; dims=1) .+ b
     result = prod_reduction(kern_mat, α) .+ b
 
     # We need to remove the trailing dimension
