@@ -28,10 +28,10 @@ function svmtrain(svm::LSSVC, x::AbstractMatrix, y::AbstractVector)
 
     # * Start solving the subproblems
     # First, solve for eta
-    η, stats = cg(H, y)
+    η, stats = cg_lanczos(H, y)
     @assert check_if_solved(stats) == true
     # Then, solve for nu
-    ν, stats = cg(H, ones(n))
+    ν, stats = cg_lanczos(H, ones(n))
     @assert check_if_solved(stats) == true
 
     # We then compute s
@@ -161,10 +161,10 @@ function svmtrain(svm::LSSVR, x::AbstractMatrix, y::AbstractVector)
 
     # * Start solving the subproblems
     # First, solve for eta
-    η, stats = cg(H, ones(n))
+    η, stats = cg_lanczos(H, ones(n))
     @assert check_if_solved(stats) == true
     # Then, solve for nu
-    ν, stats = cg(H, y)
+    ν, stats = cg_lanczos(H, y)
     @assert check_if_solved(stats) == true
 
     # We then compute s
