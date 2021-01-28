@@ -21,21 +21,27 @@ function svmtrain(svm::LSSVC, x::AbstractMatrix, y::AbstractVector)
     kwargs = _kwargs2dict(svm)
     # We build the kernel matrix and the omega matrix
     kern_mat = _build_kernel_matrix(x; kwargs...)
-    Ω = (y .* y') .* kern_mat
-    H = Ω + I / svm.γ
+    y_external = extern_prod(y, y)
+    # Mutiply the external product in-place to save memory
+    pairwise_mul!(kern_mat, y_external)
+    H = kern_mat + I / svm.γ
 
     # * Start solving the subproblems
     # First, solve for eta
-    (η, stats) = cg_lanczos(H, y)
+    η, stats = cg_lanczos(H, y)
+    @assert check_if_solved(stats) == true
     # Then, solve for nu
-    (ν, stats) = cg_lanczos(H, ones(n))
+    ν, stats = cg_lanczos(H, ones(n))
+    @assert check_if_solved(stats) == true
 
     # We then compute s
-    s = dot(y, η)
+    s = BL.dot(n, y, 1, η, 1)
 
     # Finally, we solve the problem for alpha and b
-    b = dot(η, ones(n)) / s
-    α = ν .- (η * b)
+    b = BL.dot(n, η, 1, ones(n), 1)
+    b /= s
+    rmul!(η, b)
+    α = pairwise_diff(ν, η)
 
     return (x, y, α, b)
 end
@@ -57,10 +63,11 @@ function svmpredict(svm::LSSVC, fits, xnew::AbstractMatrix)
     x, y, α, b = fits
     kwargs = _kwargs2dict(svm)
     @assert size(x, 1) == size(xnew, 1)
+    # Build the kernel matrix with new observations
     kern_mat = _build_kernel_matrix(x, xnew; kwargs...)
-    result = sum(@. kern_mat * y * α; dims=1) .+ b
-    # We need to remove the trailing dimension
-    result = reshape(result, size(result, 2))
+    # Compute the decision function
+    result = prod_reduction(kern_mat, y, α) .+ b
+    result = reshape(result, size(result, 2)) # Remove the trailing dimension
 
     return sign.(result)
 end
@@ -87,7 +94,7 @@ function svmtrain_mc(svm::LSSVC, x, y, nclass)
             all_classes = vcat(a_class, b_class) # Join both classes
 
             # Always copy the model and use views for the samples
-            samples = @view(x[:, all_indxs])
+            samples = view(x, :, all_indxs)
             # Solve the binary classification problem between classes idx and jdx
             new_svm = deepcopy(svm)
             fits = svmtrain(new_svm, samples, all_classes)
@@ -154,16 +161,19 @@ function svmtrain(svm::LSSVR, x::AbstractMatrix, y::AbstractVector)
 
     # * Start solving the subproblems
     # First, solve for eta
-    (η, stats) = cg_lanczos(H, ones(n))
+    η, stats = cg_lanczos(H, ones(n))
+    @assert check_if_solved(stats) == true
     # Then, solve for nu
-    (ν, stats) = cg_lanczos(H, y)
+    ν, stats = cg_lanczos(H, y)
+    @assert check_if_solved(stats) == true
 
     # We then compute s
-    s = dot(ones(n), η)
-
+    s = BL.dot(n, ones(n), 1, η, 1)
     # Finally, we solve the problem for alpha and b
-    b = dot(η, y) / s
-    α = ν .- (η * b)
+    b = BL.dot(n, η, 1, y, 1)
+    b /= s
+    rmul!(η, b)
+    α = pairwise_diff(ν, η)
 
     return (x, α, b)
 end
@@ -189,7 +199,7 @@ function svmpredict(svm::LSSVR, fits, xnew::AbstractMatrix)
 
     kwargs = _kwargs2dict(svm)
     kern_mat = _build_kernel_matrix(x, xnew; kwargs...)
-    result = sum(kern_mat .* α; dims=1) .+ b
+    result = prod_reduction(kern_mat, α) .+ b
 
     # We need to remove the trailing dimension
     result = reshape(result, size(result, 2))

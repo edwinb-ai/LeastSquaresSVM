@@ -123,3 +123,8 @@ function _predictions_by_votes(x)
 
     return predictions
 end
+
+"""
+    To test whether a solver from Krylov.jl solved a given problem successfully.
+"""
+check_if_solved(stat) = stat.solved || @warn "A solution was not found!"
