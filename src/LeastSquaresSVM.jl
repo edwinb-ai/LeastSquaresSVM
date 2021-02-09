@@ -4,6 +4,7 @@ using LinearAlgebra
 using KernelFunctions
 using Krylov
 using Tullio
+using StatsBase
 import MLJModelInterface
 
 const MMI = MLJModelInterface
