@@ -101,7 +101,9 @@ Essentially, this is a voting scheme for the multiclass classification problem.
 In the case of a tie, the smallest index is always chosen, i.e. 1. This is not the best
 strategy, but it is after the following paper:
 
-Chih-Wei Hsu and Chih-Jen Lin (2002) ‘A comparison of methods for multiclass support vector machines’, IEEE Transactions on Neural Networks, 13(2), pp. 416. doi: 10.1109/72.991427.
+Chih-Wei Hsu and Chih-Jen Lin (2002) ‘A comparison of methods for multiclass support 
+vector machines’, IEEE Transactions on Neural Networks, 13(2), pp. 416.
+doi: 10.1109/72.991427.
 
 Where it says the following quote:
 
