@@ -79,7 +79,6 @@ function svmtrain(svm::FixedSizeSVR, x::AbstractMatrix, y::AbstractVector)
     # Compute the weights for the decision function
     alphas = m .* fact.vectors
     @. alphas /= sqrt(fact.values)
-    # result = sum(alphas .* wi_s; dims=1)
     result = prod_reduction(alphas, wi_s)
 
     return (x, result, bias, idxs)
