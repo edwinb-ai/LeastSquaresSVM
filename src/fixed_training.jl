@@ -67,7 +67,7 @@ function svmtrain(svm::FixedSizeSVR, x::AbstractMatrix, y::AbstractVector)
     b = kern_mat_aug' * y[idxs]
 
     # We now solve the ridge regression problem
-    (result, stats) = cgls(sq_mat, b; λ=1/svm.γ)
+    result, stats = cgls(sq_mat, b; λ=1/svm.γ)
     @assert check_if_solved(stats) == true
 
     # Extract the weights and the bias found
