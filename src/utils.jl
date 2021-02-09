@@ -77,7 +77,16 @@ end
     Takes a Support Vector Machine type and converts some of its attributes to a
 dictionary that makes it easier to handle as keyword arguments.
 """
-_kwargs2dict(svm) = Dict(:kernel => svm.kernel, :sigma => svm.σ, :degree => svm.degree)
+_kwargs2dict(svm::Union{LSSVC, LSSVR}) =
+    Dict(:kernel => svm.kernel, :sigma => svm.σ, :degree => svm.degree)
+
+_kwargs2dict(svm::FixedSizeSVR) = Dict(
+    :kernel => svm.kernel,
+    :sigma => svm.σ
+    :degree => svm.degree,
+    :subsample => svm.subsample,
+    :iters => svm.iters
+)
 
 """
     Function to find all the instances in an array `y` that are
