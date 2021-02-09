@@ -68,7 +68,18 @@ mutable struct FixedSizeSVR <: SVM
     γ::Float64
     σ::Float64
     degree::Int
+    subsample::Int
+    iters::Int
 end
 
-FixedSizeSVR(; kernel=:rbf, γ=1.0, σ=1.0, degree::Int=0) = FixedSizeSVR(kernel, γ, σ, degree)
+function FixedSizeSVR(;
+    kernel=:rbf,
+    γ=1.0,
+    σ=1.0,
+    degree::Int=0
+    subsample::Int=10,
+    iters::Int=50_000
+)
+    return FixedSizeSVR(kernel, γ, σ, degree)
+end
 
