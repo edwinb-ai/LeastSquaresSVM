@@ -46,16 +46,34 @@ function _nystroem_renyi(k::Kernel, X::AbstractMatrix, n, m; iters=50_000)
 end
 
 function svmtrain(svm::FixedSizeSVR, x::AbstractMatrix, y::AbstractVector)
-    best, Cs, idxs = nystroem_renyi(k, x, n, m)
-    fact = eigen(Cs)
-    kern_mat_aug = hcat(fact.vectors, ones(m))
-    sq_mat = kern_mat_aug' * kern_mat_aug
-    b = kern_mat_aug' * y[idxs]
-    result = (sq_mat + (I / gamma)) \ b
+    # Declare the size to work with
+    n = size(y, 1)
+    m = svm.subsample
 
+    # Use this information to create the Nyström approximation
+    best, Cs, idxs = nystroem_renyi(k, x, n, m)
+
+    # We do a spectral decomposition
+    fact = eigen(Cs)
+
+    # We now augment the kernel matrix with ones to include the
+    # bias term
+    kern_mat_aug = hcat(fact.vectors, ones(m))
+
+    # Create the square matrix A^T A
+    sq_mat = kern_mat_aug' * kern_mat_aug
+
+    # We need the correct size for the vector
+    b = kern_mat_aug' * y[idxs]
+
+    # We now solve the ridge regression problem
+    (result, stats) = cgls(sq_mat, b; λ=1/svm.γ)
+
+    # Extract the weights and the bias found
     wi_s = result[1:end-1]
     bias = result[end]
 
+    # Compute the weights for the decision function
     alphas = m .* fact.vectors
     @. alphas /= sqrt(fact.values)
     result = sum(alphas .* wi_s; dims=1)
