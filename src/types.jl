@@ -50,10 +50,10 @@ end
 LSSVR(; kernel=:rbf, γ=1.0, σ=1.0, degree::Int=0) = LSSVR(kernel, γ, σ, degree)
 
 """
-    FixedSizeSVC <: SVM
-    FixedSizeSVC(; kernel=:rbf, γ=1.0, σ=1.0, degree=0)
+    FixedSizeSVR <: SVM
+    FixedSizeSVR(; kernel=:rbf, γ=1.0, σ=1.0, degree=0)
 
-The type to hold a Least Squares Support Vector Classifier, using the 
+The type to hold a Least Squares Support Vector Regressor, using the 
 fixed size formulation.
 
 # Fields
@@ -63,12 +63,12 @@ fixed size formulation.
 - `degree::Int`: The degree of the polynomial kernel. Only used if `kernel` is `:poly`.
 
 """
-mutable struct FixedSizeSVC <: SVM
+mutable struct FixedSizeSVR <: SVM
     kernel::Symbol
     γ::Float64
     σ::Float64
     degree::Int
 end
 
-FixedSizeSVC(; kernel=:rbf, γ=1.0, σ=1.0, degree::Int=0) = FixedSizeSVC(kernel, γ, σ, degree)
+FixedSizeSVR(; kernel=:rbf, γ=1.0, σ=1.0, degree::Int=0) = FixedSizeSVR(kernel, γ, σ, degree)
 
