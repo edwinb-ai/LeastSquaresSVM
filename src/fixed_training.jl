@@ -51,6 +51,8 @@ function svmtrain(svm::FixedSizeSVR, x::AbstractMatrix, y::AbstractVector)
     m = svm.subsample
 
     # Use this information to create the Nyström approximation
+    kwargs = _kwargs2dict(svm)
+    k = _choose_kernel(; kwargs...)
     best, Cs, idxs = nystroem_renyi(k, x, n, m)
 
     # We do a spectral decomposition
@@ -67,11 +69,11 @@ function svmtrain(svm::FixedSizeSVR, x::AbstractMatrix, y::AbstractVector)
     b = kern_mat_aug' * y[idxs]
 
     # We now solve the ridge regression problem
-    result, stats = cgls(sq_mat, b; λ=1/svm.γ)
+    result, stats = cgls(sq_mat, b; λ=1 / svm.γ)
     @assert check_if_solved(stats) == true
 
     # Extract the weights and the bias found
-    wi_s = result[1:end-1]
+    wi_s = result[1:end - 1]
     bias = result[end]
 
     # Compute the weights for the decision function
@@ -80,14 +82,18 @@ function svmtrain(svm::FixedSizeSVR, x::AbstractMatrix, y::AbstractVector)
     # result = sum(alphas .* wi_s; dims=1)
     result = prod_reduction(alphas, wi_s)
 
-    return (result, bias, idxs)
+    return (x, result, bias, idxs)
 end
 
-function svmpredict(svm::FixedSizeSVR, x, y)
-    alphas, bias, idxs = solve_problem(k, x, y, 0.001, n, m)
-    kern_mat = kernelmatrix(k, view(x, :, idxs), x)
-    estimates = sum(alphas * kern_mat; dims=1)
-    preds = estimates .+ bias
+function svmpredict(svm::FixedSizeSVR, fits, xnew::AbstractMatrix)
+    x, alphas, bias, idxs = fits
+    kwargs = _kwargs2dict(svm)
+    k = _choose_kernel(; kwargs...)
+    kern_mat = kernelmatrix(k, view(x, :, idxs), xnew)
+    result = prod_reduction(kern_mat, alphas) .+ b
 
-    return preds
+    # We need to remove the trailing dimension
+    result = reshape(result, size(result, 2))
+
+    return result
 end

@@ -76,7 +76,7 @@ function FixedSizeSVR(;
     kernel=:rbf,
     γ=1.0,
     σ=1.0,
-    degree::Int=0
+    degree::Int=0,
     subsample::Int=10,
     iters::Int=50_000
 )
