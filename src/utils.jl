@@ -82,7 +82,7 @@ _kwargs2dict(svm::Union{LSSVC, LSSVR}) =
 
 _kwargs2dict(svm::FixedSizeSVR) = Dict(
     :kernel => svm.kernel,
-    :sigma => svm.σ
+    :sigma => svm.σ,
     :degree => svm.degree,
     :subsample => svm.subsample,
     :iters => svm.iters
@@ -139,3 +139,4 @@ end
     To test whether a solver from Krylov.jl solved a given problem successfully.
 """
 check_if_solved(stat) = stat.solved || @warn "A solution was not found!"
+
