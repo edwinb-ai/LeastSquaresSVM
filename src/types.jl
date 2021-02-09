@@ -80,6 +80,6 @@ function FixedSizeSVR(;
     subsample::Int=10,
     iters::Int=50_000
 )
-    return FixedSizeSVR(kernel, γ, σ, degree)
+    return FixedSizeSVR(kernel, γ, σ, degree, subsample, iters)
 end
 
