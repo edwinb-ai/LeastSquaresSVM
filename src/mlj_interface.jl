@@ -74,6 +74,22 @@ function MMI.fit(model::LSSVRegressor, verbosity::Int, X, y)
     return (fitresult, cache, report)
 end
 
+function MMI.fit(model::FixedSizeRegressor, verbosity::Int, X, y)
+    Xmatrix = MMI.matrix(X; transpose=true) # notice the transpose
+
+    cache = nothing
+
+    svr = FixedSizeSVR(; kernel=model.kernel, γ=model.γ, σ=model.σ)
+    fitted = svmtrain(svr, Xmatrix, y)
+    report = (kernel = model.kernel,
+        γ = model.γ,
+        σ = model.σ,
+        size = model.subsamples,
+        iters = model.iters)
+
+    return (fitted, cache, report)
+end
+
 ##
 ## Prediction functions
 ##
