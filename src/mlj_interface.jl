@@ -16,6 +16,15 @@ MMI.@mlj_model mutable struct LSSVRegressor <: MMI.Deterministic
     degree::Int = 0::(_ >= 0)
 end
 
+MMI.@mlj_model mutable struct FixedSizeRegressor <: MMI.Deterministic
+    kernel::Symbol = :rbf::(_ in (:rbf, :linear, :poly))
+    γ::Float64 = 1.0::(_ > 0.0)
+    σ::Float64 = 1.0::(_ > 0.0)
+    degree::Int = 0::(_ >= 0)
+    subsamples::Int = 10::(_ >= 0)
+    iters::Int = 50_000::(_ >= 0)
+end
+
 ##
 ## Fitting functions
 ##
