@@ -89,7 +89,7 @@ function svmpredict(svm::FixedSizeSVR, fits, xnew::AbstractMatrix)
     kwargs = _kwargs2dict(svm)
     k = _choose_kernel(; kwargs...)
     kern_mat = kernelmatrix(k, xnew, view(x, :, idxs))
-    result = sum(kern_mat * alphas'; dims=1) .+ b
+    result = sum(kern_mat * alphas'; dims=1) .+ bias
 
     # We need to remove the trailing dimension
     result = reshape(result, size(result, 2))
