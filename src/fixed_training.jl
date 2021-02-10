@@ -88,11 +88,12 @@ function svmpredict(svm::FixedSizeSVR, fits, xnew::AbstractMatrix)
     x, alphas, bias, idxs = fits
     kwargs = _kwargs2dict(svm)
     k = _choose_kernel(; kwargs...)
-    kern_mat = kernelmatrix(k, xnew, view(x, :, idxs))
-    result = sum(kern_mat * alphas'; dims=1) .+ bias
+    kern_mat = kernelmatrix(k, xnew, view(x, :, idxs)) |> transpose
+    alphas = dropdims(alphas; dims=1)
+    result = prod_reduction(kern_mat, alphas) .+ bias
 
     # We need to remove the trailing dimension
-    result = reshape(result, size(result, 2))
+    result = dropdims(result; dims=1)
 
     return result
 end

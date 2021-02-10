@@ -47,26 +47,27 @@ using Random
 #     @test acc >= 0.95
 # end
 
-# @testset "MLJ Integration Regressor" begin
-#     X, y = MLJ.make_regression(100, 5; noise=0.5, rng=18)
-#     df = DataFrame(X)
-#     df.y = y
-#     dfnew = coerce(df, autotype(df))
+@testset "MLJ Integration Regressor" begin
+    X, y = MLJ.make_regression(100, 5; noise=0.5, rng=18)
+    df = DataFrame(X)
+    df.y = y
+    dfnew = coerce(df, autotype(df))
 
-#     y, X = unpack(dfnew, ==(:y), colname -> true)
-#     train, test = partition(eachindex(y), 0.75, shuffle=true, rng=20)
+    y, X = unpack(dfnew, ==(:y), colname -> true)
+    train, test = partition(eachindex(y), 0.75, shuffle=true, rng=20)
 
-#     # Define a good set of hyperparameters for this problem
-#     model = MLJ.@pipeline(Standardizer(), LSSVRegressor(γ=10.0, σ=0.5))
-#     mach = MLJ.machine(model, X, y)
-#     MLJ.fit!(mach, rows=train, verbosity=0)
+    # Define a good set of hyperparameters for this problem
+    model = MLJ.@pipeline(Standardizer(), LSSVRegressor(γ=10.0, σ=0.5))
+    mach = MLJ.machine(model, X, y)
+    MLJ.fit!(mach, rows=train, verbosity=0)
 
-#     ŷ = MLJ.predict(mach, rows=test)
-#     result = round(MLJ.rms(ŷ, y[test]), sigdigits=4)
+    ŷ = MLJ.predict(mach, rows=test)
+    result = round(MLJ.rms(ŷ, y[test]), sigdigits=4)
+    @show result
 
-#     # Test for correctness
-#     @test isreal(result)
-# end
+    # Test for correctness
+    @test isreal(result)
+end
 
 @testset "MLJ Integration Fixed Size Regressor" begin
     n = 500
@@ -83,22 +84,21 @@ using Random
     stand1 = Standardizer()
     X = MLJ.transform(MLJ.fit!(MLJ.machine(stand1, X)), X)
     model = FixedSizeRegressor(subsample=m)
-    r1 = MLJ.range(model, :σ, lower=1e-2, upper=1e2)
-    r2 = MLJ.range(model, :γ, lower=10, upper=1000)
+    r1 = MLJ.range(model, :σ, lower=1e2, upper=1e4)
+    r2 = MLJ.range(model, :γ, lower=1e-2, upper=10)
     self_tuning_model = TunedModel(
         model=model,
-        tuning=Grid(goal=400, rng=40),
+        tuning=Grid(goal=100, rng=42),
         resampling=CV(nfolds=5),
         range=[r1, r2],
         measure=MLJ.rms,
         acceleration=CPUThreads()
     )
     mach = MLJ.machine(self_tuning_model, X, y)
-    MLJ.fit!(mach, rows=train, verbosity=1)
-    display(fitted_params(mach).best_model)
+    MLJ.fit!(mach, rows=train, verbosity=0)
     ŷ = MLJ.predict(mach, rows=test)
     result = round(MLJ.rms(ŷ, y[test]), sigdigits=4)
-    display(result)
+    @show result
 
     # Test for correctness
     @test isreal(result)
