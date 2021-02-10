@@ -34,9 +34,9 @@ function _nystroem_renyi(k::Kernel, X::AbstractMatrix, n, m; iters=50_000)
     idxs = Vector{Int}(undef, m)
 
     for _ = 1:iters
-        idxs = sampleindex(X, r)
-        C, Cs = sample_matrix(k, X, idxs)
-        old = renyi_entropy(Cs, n, m)
+        idxs = _sampleindex(X, r)
+        C, Cs = _sample_matrix(k, X, idxs)
+        old = _renyi_entropy(Cs, n, m)
         if old > best
             best = old
         end
@@ -53,7 +53,7 @@ function svmtrain(svm::FixedSizeSVR, x::AbstractMatrix, y::AbstractVector)
     # Use this information to create the Nyström approximation
     kwargs = _kwargs2dict(svm)
     k = _choose_kernel(; kwargs...)
-    best, Cs, idxs = nystroem_renyi(k, x, n, m)
+    best, Cs, idxs = _nystroem_renyi(k, x, n, m; iters=svm.iters)
 
     # We do a spectral decomposition
     fact = eigen(Cs)
@@ -88,8 +88,8 @@ function svmpredict(svm::FixedSizeSVR, fits, xnew::AbstractMatrix)
     x, alphas, bias, idxs = fits
     kwargs = _kwargs2dict(svm)
     k = _choose_kernel(; kwargs...)
-    kern_mat = kernelmatrix(k, view(x, :, idxs), xnew)
-    result = prod_reduction(kern_mat, alphas) .+ b
+    kern_mat = kernelmatrix(k, xnew, view(x, :, idxs))
+    result = sum(kern_mat * alphas'; dims=1) .+ b
 
     # We need to remove the trailing dimension
     result = reshape(result, size(result, 2))

@@ -21,7 +21,7 @@ MMI.@mlj_model mutable struct FixedSizeRegressor <: MMI.Deterministic
     γ::Float64 = 1.0::(_ > 0.0)
     σ::Float64 = 1.0::(_ > 0.0)
     degree::Int = 0::(_ >= 0)
-    subsamples::Int = 10::(_ >= 0)
+    subsample::Int = 10::(_ >= 0)
     iters::Int = 50_000::(_ >= 0)
 end
 
@@ -79,14 +79,19 @@ function MMI.fit(model::FixedSizeRegressor, verbosity::Int, X, y)
 
     cache = nothing
 
-    svr = FixedSizeSVR(; kernel=model.kernel, γ=model.γ, σ=model.σ)
+    svr = FixedSizeSVR(; kernel=model.kernel,
+    γ=model.γ,
+    σ=model.σ,
+    subsample=model.subsample,
+    iters=model.iters
+    )
     fitted = svmtrain(svr, Xmatrix, y)
     fitresult = (deepcopy(svr), fitted)
 
     report = (kernel = model.kernel,
         γ = model.γ,
         σ = model.σ,
-        size = model.subsamples,
+        size = model.subsample,
         iters = model.iters)
 
     return (fitresult, cache, report)

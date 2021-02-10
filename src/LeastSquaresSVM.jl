@@ -11,7 +11,7 @@ const MMI = MLJModelInterface
 const BL = LinearAlgebra.BLAS
 
 export SVM, LSSVC, LSSVR, KernelRBF, svmtrain, svmtrain_mc, svmpredict, LSSVClassifier,
-LSSVRegressor, FixedSizeSVR
+LSSVRegressor, FixedSizeSVR, FixedSizeRegressor
 
 include("types.jl")
 include("utils.jl")
