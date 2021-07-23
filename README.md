@@ -7,16 +7,21 @@
 This is an implementation in pure `Julia` of the Least Squares Support Vector Machines [1] by Suykens and Vandewalle.
 It contains both a **classifier** and a **regressor** implementation.
 
-# Installation
+## Installation
 
 You install this package from `Pkg` like so
 
 ```julia
-Pkg> add https://github.com/edwinb-ai/LeastSquaresSVM.git
+pkg> add https://github.com/edwinb-ai/LeastSquaresSVM.git
 ```
 
 This will install all the dependencies and you are good to go.
 
-# References
+## Benchmarks
+
+Some benchmarks of the methods presented here are displayed in the
+[LSSVM-benchmarks site.](https://edwinb-ai.github.io/LSSVM-benchmarks/)
+
+## References
 
 [1. Least Squares Support Vector Machine Classifiers](https://link.springer.com/article/10.1023/A:1018628609742)
