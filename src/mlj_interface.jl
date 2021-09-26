@@ -2,8 +2,7 @@
 ## Types
 ##
 
-MMI.@mlj_model mutable struct LSSVClassifier <:
-                                            MMI.Deterministic
+MMI.@mlj_model mutable struct LSSVClassifier <: MMI.Deterministic
     kernel::Symbol = :rbf::(_ in (:rbf, :linear, :poly))
     γ::Float64 = 1.0::(_ > 0.0)
     σ::Float64 = 1.0::(_ > 0.0)
@@ -17,8 +16,7 @@ MMI.@mlj_model mutable struct LSSVRegressor <: MMI.Deterministic
     degree::Int = 0::(_ >= 0)
 end
 
-MMI.@mlj_model mutable struct FixedSizeRegressor <:
-                                            MMI.Deterministic
+MMI.@mlj_model mutable struct FixedSizeRegressor <: MMI.Deterministic
     kernel::Symbol = :rbf::(_ in (:rbf, :linear, :poly))
     γ::Float64 = 1.0::(_ > 0.0)
     σ::Float64 = 1.0::(_ > 0.0)

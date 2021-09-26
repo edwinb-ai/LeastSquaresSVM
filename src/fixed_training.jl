@@ -1,7 +1,9 @@
 function _sampleindex(X::AbstractMatrix, r::Real)
+    # Check that `r` is always within the open interval (0, 1]
     0 < r <= 1 || throw(ArgumentError("Sample rate `r` must be in range (0,1]"))
     n = size(X, 2)
     m = ceil(Int, n * r)
+    # We sample indices **without** replacement
     S = StatsBase.sample(1:n, m; replace=false, ordered=true)
 
     return S
@@ -42,7 +44,7 @@ function _nystroem_renyi(k::Kernel, X::AbstractMatrix, n, m; iters=50_000)
         end
     end
 
-    return (best, Cs, idxs)
+    return best, Cs, idxs
 end
 
 function svmtrain(svm::FixedSizeSVR, x::AbstractMatrix, y::AbstractVector)
@@ -53,7 +55,7 @@ function svmtrain(svm::FixedSizeSVR, x::AbstractMatrix, y::AbstractVector)
     # Use this information to create the Nyström approximation
     kwargs = _kwargs2dict(svm)
     k = _choose_kernel(; kwargs...)
-    best, Cs, idxs = _nystroem_renyi(k, x, n, m; iters=svm.iters)
+    (_, Cs, idxs) = _nystroem_renyi(k, x, n, m; iters=svm.iters)
 
     # We do a spectral decomposition
     fact = eigen(Cs)
@@ -62,24 +64,25 @@ function svmtrain(svm::FixedSizeSVR, x::AbstractMatrix, y::AbstractVector)
     # bias term
     kern_mat_aug = hcat(fact.vectors, ones(m))
 
-    # Create the square matrix A^T A
+    # Create the square matrix A^T * A
     sq_mat = kern_mat_aug' * kern_mat_aug
 
     # We need the correct size for the vector
     b = kern_mat_aug' * y[idxs]
 
-    # We now solve the ridge regression problem
-    result, stats = cgls(sq_mat, b; λ=1 / svm.γ)
-    @assert check_if_solved(stats) == true
+    # We now solve the ridge regression problem, here we are using an iterative method
+    λ_reg = 1.0 / svm.γ # The regularization parameter
+    result, stats = cgls(sq_mat, b; λ=λ_reg)
+    @assert check_if_solved(stats) == true # Always check if the iterative method converges
 
     # Extract the weights and the bias found
-    wi_s = result[1:end - 1]
+    weights = result[1:end - 1]
     bias = result[end]
 
-    # Compute the weights for the decision function
+    # Compute the alphas(i.e. weights) for the decision function
     alphas = m .* fact.vectors
     @. alphas /= sqrt(fact.values)
-    result = prod_reduction(alphas, wi_s)
+    result = prod_reduction(alphas, weights)
 
     return (x, result, bias, idxs)
 end
@@ -88,7 +91,7 @@ function svmpredict(svm::FixedSizeSVR, fits, xnew::AbstractMatrix)
     x, alphas, bias, idxs = fits
     kwargs = _kwargs2dict(svm)
     k = _choose_kernel(; kwargs...)
-    kern_mat = kernelmatrix(k, xnew, view(x, :, idxs)) |> transpose
+    kern_mat = transpose(kernelmatrix(k, xnew, view(x, :, idxs)))
     alphas = dropdims(alphas; dims=1)
     result = prod_reduction(kern_mat, alphas) .+ bias
 
