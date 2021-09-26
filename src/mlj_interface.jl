@@ -28,7 +28,7 @@ MMI.@mlj_model mutable struct FixedSizeRegressor <:
 end
 
 ###
-### Trait declarations
+### Trait declarations for the target values for the classifier
 ###
 MMI.target_scitype(::Type{<:LSSVClassifier}) = AbstractVector{<:ST.Finite}
 

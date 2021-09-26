@@ -25,16 +25,17 @@ using MLJ
 
     # We don't need `missing`'s
     data = dropmissing(data)
+
+    # We change the integer types to floating point types, and multiclass for the
+    # classes
     coerce!(data, Count => Continuous, :class => Multiclass)
-    display(schema(data))
 
     # Split the training and test data
     y, X = unpack(data, ==(:class), colname -> true)
-    train, test = partition(eachindex(y), 2.0 / 3.0, shuffle=true, rng=15)
+    train, test = partition(eachindex(y), 2.0 / 3.0, shuffle=true, rng=20)
 
     # Define a good set of hyperparameters for this problem
-    # pipe = MLJ.@pipeline(Standardizer(count=true), LSSVClassifier(γ=80.0, σ=0.233333))
-    pipe = LSSVClassifier(γ=80.0, σ=0.233333)
+    pipe = MLJ.@pipeline(Standardizer(), LSSVClassifier(γ=80.0, σ=0.233333))
     mach = MLJ.machine(pipe, X, y)
     MLJ.fit!(mach, rows=train, verbosity=0)
 
