@@ -1,6 +1,7 @@
 using DataFrames, CSV
 using CategoricalArrays
 using Random
+using MLJ
 
 @testset "MLJ Integration Classification" begin
     # ============== Problem setup ============ #
@@ -14,7 +15,7 @@ using Random
 
     path = "wbc.csv"
     # Replace the "?" to `missing`
-    data = CSV.File(path; header=headers, missingstring="?") |> DataFrame
+    data = DataFrame(CSV.File(path; header=headers, missingstring="?"))
 
     # Don't include the id's
     select!(data, Not(:id))
@@ -70,9 +71,9 @@ end
 end
 
 @testset "MLJ Integration Fixed Size Regressor" begin
-    n = 500
-    m = 10
-    X, y = MLJ.make_regression(n, 2; noise=0.5, rng=18)
+    n = 500 # Total number of points or samples
+    m = 10 # Subset of points or samples
+    X, y = MLJ.make_regression(n, 2; noise=0.5, rng=18) # Here, 2 is the number of features
     df = DataFrame(X)
     df.y = y
     dfnew = coerce(df, autotype(df))

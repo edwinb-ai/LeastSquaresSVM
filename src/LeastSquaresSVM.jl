@@ -5,13 +5,20 @@ using KernelFunctions
 using Krylov
 using Tullio
 using StatsBase
-import MLJModelInterface
+import LinearAlgebra.BLAS as BL
+import MLJModelInterface as MMI
 
-const MMI = MLJModelInterface
-const BL = LinearAlgebra.BLAS
-
-export SVM, LSSVC, LSSVR, KernelRBF, svmtrain, svmtrain_mc, svmpredict, LSSVClassifier,
-LSSVRegressor, FixedSizeSVR, FixedSizeRegressor
+export SVM,
+    LSSVC,
+    LSSVR,
+    KernelRBF,
+    svmtrain,
+    svmtrain_mc,
+    svmpredict,
+    LSSVClassifier,
+    LSSVRegressor,
+    FixedSizeSVR,
+    FixedSizeRegressor
 
 include("types.jl")
 include("utils.jl")
