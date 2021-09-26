@@ -7,6 +7,13 @@ using Tullio
 using StatsBase
 import LinearAlgebra.BLAS as BL
 import MLJModelInterface
+import ScientificTypes
+
+# We declare a shorter name because there appears to be a bug with the `as` keyword
+# for the `MLJModelInterface` module
+const MMI = MLJModelInterface
+# The same for `ScientificTypesBase`
+const ST = ScientificTypes
 
 export SVM,
     LSSVC,

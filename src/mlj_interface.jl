@@ -2,23 +2,23 @@
 ## Types
 ##
 
-MLJModelInterface.@mlj_model mutable struct LSSVClassifier <:
-                                            MLJModelInterface.Deterministic
+MMI.@mlj_model mutable struct LSSVClassifier <:
+                                            MMI.Deterministic
     kernel::Symbol = :rbf::(_ in (:rbf, :linear, :poly))
     γ::Float64 = 1.0::(_ > 0.0)
     σ::Float64 = 1.0::(_ > 0.0)
     degree::Int = 0::(_ >= 0)
 end
 
-MLJModelInterface.@mlj_model mutable struct LSSVRegressor <: MLJModelInterface.Deterministic
+MMI.@mlj_model mutable struct LSSVRegressor <: MMI.Deterministic
     kernel::Symbol = :rbf::(_ in (:rbf, :linear, :poly))
     γ::Float64 = 1.0::(_ > 0.0)
     σ::Float64 = 1.0::(_ > 0.0)
     degree::Int = 0::(_ >= 0)
 end
 
-MLJModelInterface.@mlj_model mutable struct FixedSizeRegressor <:
-                                            MLJModelInterface.Deterministic
+MMI.@mlj_model mutable struct FixedSizeRegressor <:
+                                            MMI.Deterministic
     kernel::Symbol = :rbf::(_ in (:rbf, :linear, :poly))
     γ::Float64 = 1.0::(_ > 0.0)
     σ::Float64 = 1.0::(_ > 0.0)
@@ -27,18 +27,23 @@ MLJModelInterface.@mlj_model mutable struct FixedSizeRegressor <:
     iters::Int = 50_000::(_ >= 0)
 end
 
+###
+### Trait declarations
+###
+MMI.target_scitype(::Type{<:LSSVClassifier}) = AbstractVector{<:ST.Finite}
+
 ##
 ## Fitting functions
 ##
 
-function MLJModelInterface.fit(model::LSSVClassifier, verbosity::Int, X, y)
-    Xmatrix = MLJModelInterface.matrix(X; transpose=true) # notice the transpose
+function MMI.fit(model::LSSVClassifier, verbosity::Int, X, y)
+    Xmatrix = MMI.matrix(X; transpose=true) # notice the transpose
 
     a_target_element = y[1]
-    num_classes = length(MLJModelInterface.classes(a_target_element))
+    num_classes = length(MMI.classes(a_target_element))
 
-    decode = MLJModelInterface.decoder(a_target_element) # for predict method
-    y_plain = convert(Array{eltype(Xmatrix)}, MLJModelInterface.int(y))
+    decode = MMI.decoder(a_target_element) # for predict method
+    y_plain = convert(Array{eltype(Xmatrix)}, MMI.int(y))
 
     cache = nothing
 
@@ -61,8 +66,8 @@ function MLJModelInterface.fit(model::LSSVClassifier, verbosity::Int, X, y)
     return (fitresult, cache, report)
 end
 
-function MLJModelInterface.fit(model::LSSVRegressor, verbosity::Int, X, y)
-    Xmatrix = MLJModelInterface.matrix(X; transpose=true) # notice the transpose
+function MMI.fit(model::LSSVRegressor, verbosity::Int, X, y)
+    Xmatrix = MMI.matrix(X; transpose=true) # notice the transpose
 
     cache = nothing
 
@@ -76,8 +81,8 @@ function MLJModelInterface.fit(model::LSSVRegressor, verbosity::Int, X, y)
     return (fitresult, cache, report)
 end
 
-function MLJModelInterface.fit(model::FixedSizeRegressor, verbosity::Int, X, y)
-    Xmatrix = MLJModelInterface.matrix(X; transpose=true) # notice the transpose
+function MMI.fit(model::FixedSizeRegressor, verbosity::Int, X, y)
+    Xmatrix = MMI.matrix(X; transpose=true) # notice the transpose
 
     cache = nothing
 
@@ -102,8 +107,8 @@ end
 ## Prediction functions
 ##
 
-function MLJModelInterface.predict(model::LSSVClassifier, fitresult, Xnew)
-    Xmatrix = MLJModelInterface.matrix(Xnew; transpose=true) # notice the transpose
+function MMI.predict(model::LSSVClassifier, fitresult, Xnew)
+    Xmatrix = MMI.matrix(Xnew; transpose=true) # notice the transpose
     n_fits = length(fitresult) # number of elements from the fit step
 
     if n_fits == 3 # binary classification
@@ -112,7 +117,7 @@ function MLJModelInterface.predict(model::LSSVClassifier, fitresult, Xnew)
         broadcast!(x -> x == -1.0 ? 2.0 : 1.0, results, results)
         y = convert(Array{UInt64}, results)
         predictions = decode(y)
-    else
+    else # multiclass classification
         (fitted, decode) = fitresult
         results = svmpredict_mc(fitted, Xmatrix)
         y = convert(Array{UInt64}, results)
@@ -122,16 +127,16 @@ function MLJModelInterface.predict(model::LSSVClassifier, fitresult, Xnew)
     return predictions
 end
 
-function MLJModelInterface.predict(model::LSSVRegressor, fitresult, Xnew)
-    Xmatrix = MLJModelInterface.matrix(Xnew; transpose=true) # notice the transpose
+function MMI.predict(model::LSSVRegressor, fitresult, Xnew)
+    Xmatrix = MMI.matrix(Xnew; transpose=true) # notice the transpose
     (svr, fitted) = fitresult
     results = svmpredict(svr, fitted, Xmatrix)
 
     return results
 end
 
-function MLJModelInterface.predict(model::FixedSizeRegressor, fitresult, Xnew)
-    Xmatrix = MLJModelInterface.matrix(Xnew; transpose=true) # notice the transpose
+function MMI.predict(model::FixedSizeRegressor, fitresult, Xnew)
+    Xmatrix = MMI.matrix(Xnew; transpose=true) # notice the transpose
     (svr, fitted) = fitresult
     results = svmpredict(svr, fitted, Xmatrix)
 
@@ -145,7 +150,7 @@ end
 # shared metadata
 const LSSVM = (LSSVClassifier, LSSVRegressor, FixedSizeRegressor)
 
-MLJModelInterface.metadata_pkg.(
+MMI.metadata_pkg.(
     LSSVM,
     name="LeastSquaresSVM",
     uuid="6bfd0e71-701c-47cd-9c90-5bf8fe84640d",
@@ -155,28 +160,28 @@ MLJModelInterface.metadata_pkg.(
     is_wrapper=false,
 )
 
-MLJModelInterface.metadata_model(
+MMI.metadata_model(
     LSSVClassifier;
-    input=MLJModelInterface.Table(MLJModelInterface.Continuous),
-    target=AbstractVector{MLJModelInterface.Finite},
+    input=MMI.Table(MMI.Continuous),
+    target=AbstractVector{MMI.Finite},
     weights=false,
     descr="A Least Squares Support Vector Classifier implementation.",
     path="LeastSquaresSVM.LSSVClassifier",
 )
 
-MLJModelInterface.metadata_model(
+MMI.metadata_model(
     LSSVRegressor;
-    input=MLJModelInterface.Table(MLJModelInterface.Continuous),
-    target=AbstractVector{MLJModelInterface.Continuous},
+    input=MMI.Table(MMI.Continuous),
+    target=AbstractVector{MMI.Continuous},
     weights=false,
     descr="A Least Squares Support Vector Regressor implementation.",
     path="LeastSquaresSVM.LSSVRegressor",
 )
 
-MLJModelInterface.metadata_model(
+MMI.metadata_model(
     FixedSizeRegressor;
-    input=MLJModelInterface.Table(MLJModelInterface.Continuous),
-    target=AbstractVector{MLJModelInterface.Continuous},
+    input=MMI.Table(MMI.Continuous),
+    target=AbstractVector{MMI.Continuous},
     weights=false,
     descr="A Fixed Size Least Squares Support Vector Regressor implementation.",
     path="LeastSquaresSVM.FixedSizeRegressor",
