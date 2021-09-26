@@ -35,7 +35,7 @@ function _build_kernel_matrix(x; kwargs...)
     if kernel == :rbf
         # Create the kernel with the corresponding scale
         t = ScaleTransform(_revert(kwargs[:sigma]))
-        κ = transform(SqExponentialKernel(), t)
+        κ = SqExponentialKernel() ∘ t
         kern_mat = kernelmatrix(κ, x)
     elseif kernel == :linear
         κ = LinearKernel()
@@ -59,7 +59,7 @@ function _build_kernel_matrix(x, y; kwargs...)
     if kernel == :rbf
         # Create the kernel with the corresponding scale
         t = ScaleTransform(_revert(kwargs[:sigma]))
-        κ = transform(SqExponentialKernel(), t)
+        κ = SqExponentialKernel() ∘ t
         kern_mat = kernelmatrix(κ, x, y)
     elseif kernel == :linear
         κ = LinearKernel()
@@ -80,7 +80,7 @@ function _choose_kernel(; kwargs...)
     if kernel == :rbf
         # Create the kernel with the corresponding scale
         t = ScaleTransform(_revert(kwargs[:sigma]))
-        κ = transform(SqExponentialKernel(), t)
+        κ = SqExponentialKernel() ∘ t
     elseif kernel == :linear
         κ = LinearKernel()
     elseif kernel == :poly

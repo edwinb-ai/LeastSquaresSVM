@@ -6,7 +6,7 @@ using Krylov
 using Tullio
 using StatsBase
 import LinearAlgebra.BLAS as BL
-import MLJModelInterface as MMI
+import MLJModelInterface
 
 export SVM,
     LSSVC,
