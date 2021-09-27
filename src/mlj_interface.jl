@@ -37,7 +37,7 @@ MMI.target_scitype(::Type{<:LSSVClassifier}) = AbstractVector{<:ST.Finite}
 ### Data front-end
 ###
 
-# Fitting methods
+# * Fitting methods
 ## Reformatting the data matrix
 function MMI.reformat(::Union{LSSVMTypes,FixedSizeRegressor}, X, y)
     return (MMI.matrix(X; transpose=true), y)
@@ -58,6 +58,20 @@ function MMI.selectrows(svm::FixedSizeRegressor, I, A, y)
     )
 
     return factorization_entropy(svr, X_matrix, y_target)
+end
+
+# * Prediction methods
+## Reformatting the data matrix
+function MMI.reformat(::Union{LSSVMTypes,FixedSizeRegressor}, X)
+    return (MMI.matrix(X; transpose=true),)
+end
+MMI.reformat(::FixedSizeRegressor, X, y) = MMI.matrix(X; transpose=true)
+
+# Select rows
+function MMI.selectrows(::FixedSizeRegressor, I, A)
+    matrix_view = view(A, :, I)
+
+    return matrix_view
 end
 
 ##
@@ -105,6 +119,7 @@ function MMI.fit(model::LSSVRegressor, verbosity::Int, X, y)
     return (fitresult, cache, report)
 end
 
+# TODO: It looks like the reformat is not working as expected, it is returning all the elements from the arrays as arguements, perhaps this is not the right way to do it
 function MMI.fit(model::FixedSizeRegressor, verbosity::Int, X, y)
     cache = nothing
 
@@ -129,8 +144,7 @@ end
 ## Prediction functions
 ##
 
-function MMI.predict(model::LSSVClassifier, fitresult, Xnew)
-    Xmatrix = MMI.matrix(Xnew; transpose=true) # notice the transpose
+function MMI.predict(::LSSVClassifier, fitresult, Xmatrix)
     n_fits = length(fitresult) # number of elements from the fit step
 
     if n_fits == 3 # binary classification
@@ -149,16 +163,15 @@ function MMI.predict(model::LSSVClassifier, fitresult, Xnew)
     return predictions
 end
 
-function MMI.predict(model::LSSVRegressor, fitresult, Xnew)
-    Xmatrix = MMI.matrix(Xnew; transpose=true) # notice the transpose
+function MMI.predict(::LSSVRegressor, fitresult, Xmatrix)
     (svr, fitted) = fitresult
     results = svmpredict(svr, fitted, Xmatrix)
 
     return results
 end
 
-function MMI.predict(model::FixedSizeRegressor, fitresult, Xnew)
-    Xmatrix = MMI.matrix(Xnew; transpose=true) # notice the transpose
+# TODO: For some reason, the `selectrows` method does not return the matrix, but instead it returns the unrolled array as arguments
+function MMI.predict(::FixedSizeRegressor, fitresult, Xnew)
     (svr, fitted) = fitresult
     results = svmpredict(svr, fitted, Xmatrix)
 

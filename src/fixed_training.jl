@@ -101,7 +101,7 @@ function svmtrain(svm::FixedSizeSVR, X, y)
     return X_matrix, result, bias, idxs
 end
 
-function svmpredict(svm::FixedSizeSVR, fits, xnew::AbstractMatrix)
+function svmpredict(svm::FixedSizeSVR, fits, xnew)
     (x, alphas, bias, idxs) = fits
     kwargs = _kwargs2dict(svm)
     k = _choose_kernel(; kwargs...)
