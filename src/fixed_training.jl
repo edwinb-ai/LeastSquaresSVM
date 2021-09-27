@@ -35,7 +35,7 @@ function _nystroem_renyi(k::Kernel, X::AbstractMatrix, n, m; iters=50_000)
     Cs = Matrix{eltype(X)}(undef, m, m)
     idxs = Vector{Int}(undef, m)
 
-    for _ = 1:iters
+    for _ in 1:iters
         idxs = _sampleindex(X, r)
         C, Cs = _sample_matrix(k, X, idxs)
         old = _renyi_entropy(Cs, n, m)
@@ -47,7 +47,7 @@ function _nystroem_renyi(k::Kernel, X::AbstractMatrix, n, m; iters=50_000)
     return best, Cs, idxs
 end
 
-function svmtrain(svm::FixedSizeSVR, x::AbstractMatrix, y::AbstractVector)
+function factorization_entropy(svm::FixedSizeSVR, X, y)
     # Declare the size to work with
     n = size(y, 1)
     m = svm.subsample
@@ -55,7 +55,7 @@ function svmtrain(svm::FixedSizeSVR, x::AbstractMatrix, y::AbstractVector)
     # Use this information to create the Nyström approximation
     kwargs = _kwargs2dict(svm)
     k = _choose_kernel(; kwargs...)
-    (_, Cs, idxs) = _nystroem_renyi(k, x, n, m; iters=svm.iters)
+    (_, Cs, idxs) = _nystroem_renyi(k, X, n, m; iters=svm.iters)
 
     # We do a spectral decomposition
     fact = eigen(Cs)
@@ -64,11 +64,25 @@ function svmtrain(svm::FixedSizeSVR, x::AbstractMatrix, y::AbstractVector)
     # bias term
     kern_mat_aug = hcat(fact.vectors, ones(m))
 
-    # Create the square matrix A^T * A
+    # Build a named tuple for all the information
+    info_tuple = (
+        matrices=(X_matrix=X, eigen_fact=fact, aug_matrix=kern_mat_aug),
+        target=(y_target=y, idxs=idxs),
+    )
+
+    return info_tuple
+end
+
+function svmtrain(svm::FixedSizeSVR, X, y)
+    # Extract the necessary data from the arguments
+    (X_matrix, fact, kern_mat_aug) = X
+    (y_target, idxs) = y
+
+    # Create a square matrix A^T * A from subsampled data
     sq_mat = kern_mat_aug' * kern_mat_aug
 
     # We need the correct size for the vector
-    b = kern_mat_aug' * y[idxs]
+    b = kern_mat_aug' * y_target[idxs]
 
     # We now solve the ridge regression problem, here we are using an iterative method
     λ_reg = 1.0 / svm.γ # The regularization parameter
@@ -76,19 +90,19 @@ function svmtrain(svm::FixedSizeSVR, x::AbstractMatrix, y::AbstractVector)
     @assert check_if_solved(stats) == true # Always check if the iterative method converges
 
     # Extract the weights and the bias found
-    weights = result[1:end - 1]
+    weights = result[1:(end - 1)]
     bias = result[end]
 
     # Compute the alphas(i.e. weights) for the decision function
-    alphas = m .* fact.vectors
+    alphas = svm.subsample .* fact.vectors
     @. alphas /= sqrt(fact.values)
     result = prod_reduction(alphas, weights)
 
-    return (x, result, bias, idxs)
+    return X_matrix, result, bias, idxs
 end
 
 function svmpredict(svm::FixedSizeSVR, fits, xnew::AbstractMatrix)
-    x, alphas, bias, idxs = fits
+    (x, alphas, bias, idxs) = fits
     kwargs = _kwargs2dict(svm)
     k = _choose_kernel(; kwargs...)
     kern_mat = transpose(kernelmatrix(k, xnew, view(x, :, idxs)))

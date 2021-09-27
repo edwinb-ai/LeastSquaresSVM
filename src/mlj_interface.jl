@@ -25,23 +25,51 @@ MMI.@mlj_model mutable struct FixedSizeRegressor <: MMI.Deterministic
     iters::Int = 50_000::(_ >= 0)
 end
 
+const LSSVMTypes = Union{LSSVClassifier,LSSVRegressor}
+
 ###
 ### Trait declarations for the target values for the classifier
 ###
+
 MMI.target_scitype(::Type{<:LSSVClassifier}) = AbstractVector{<:ST.Finite}
+
+###
+### Data front-end
+###
+
+# Fitting methods
+## Reformatting the data matrix
+function MMI.reformat(::Union{LSSVMTypes,FixedSizeRegressor}, X, y)
+    return (MMI.matrix(X; transpose=true), y)
+end
+# MMI.reformat(::FixedSizeRegressor, X, y) = MMI.matrix(X; transpose=true)
+
+## Select rows
+function MMI.selectrows(svm::FixedSizeRegressor, I, A, y)
+    X_matrix = view(A, :, I)
+    y_target = view(y, I)
+
+    svr = FixedSizeSVR(;
+        kernel=svm.kernel,
+        γ=svm.γ,
+        σ=svm.σ,
+        subsample=svm.subsample,
+        iters=svm.iters,
+    )
+
+    return factorization_entropy(svr, X_matrix, y_target)
+end
 
 ##
 ## Fitting functions
 ##
 
 function MMI.fit(model::LSSVClassifier, verbosity::Int, X, y)
-    Xmatrix = MMI.matrix(X; transpose=true) # notice the transpose
-
     a_target_element = y[1]
     num_classes = length(MMI.classes(a_target_element))
 
     decode = MMI.decoder(a_target_element) # for predict method
-    y_plain = convert(Array{eltype(Xmatrix)}, MMI.int(y))
+    y_plain = convert(Array{eltype(X)}, MMI.int(y))
 
     cache = nothing
 
@@ -49,14 +77,14 @@ function MMI.fit(model::LSSVClassifier, verbosity::Int, X, y)
         new_y = broadcast(x -> x == 2.0 ? -1.0 : 1.0, y_plain)
 
         svm = LSSVC(; kernel=model.kernel, γ=model.γ, σ=model.σ)
-        fitted = svmtrain(svm, Xmatrix, new_y)
+        fitted = svmtrain(svm, X, new_y)
 
         fitresult = (deepcopy(svm), fitted, decode)
 
         report = (kernel=model.kernel, γ=model.γ, σ=model.σ)
     else # multiclass classification
         svm = LSSVC(; kernel=model.kernel, γ=model.γ, σ=model.σ)
-        fitted = svmtrain_mc(svm, Xmatrix, y_plain, num_classes)
+        fitted = svmtrain_mc(svm, X, y_plain, num_classes)
         fitresult = (fitted, decode)
         report = (kernel=model.kernel, γ=model.γ, σ=model.σ)
     end
@@ -65,12 +93,10 @@ function MMI.fit(model::LSSVClassifier, verbosity::Int, X, y)
 end
 
 function MMI.fit(model::LSSVRegressor, verbosity::Int, X, y)
-    Xmatrix = MMI.matrix(X; transpose=true) # notice the transpose
-
     cache = nothing
 
     svr = LSSVR(; kernel=model.kernel, γ=model.γ, σ=model.σ)
-    fitted = svmtrain(svr, Xmatrix, y)
+    fitted = svmtrain(svr, X, y)
 
     fitresult = (deepcopy(svr), fitted)
 
@@ -80,8 +106,6 @@ function MMI.fit(model::LSSVRegressor, verbosity::Int, X, y)
 end
 
 function MMI.fit(model::FixedSizeRegressor, verbosity::Int, X, y)
-    Xmatrix = MMI.matrix(X; transpose=true) # notice the transpose
-
     cache = nothing
 
     svr = FixedSizeSVR(;
@@ -91,7 +115,7 @@ function MMI.fit(model::FixedSizeRegressor, verbosity::Int, X, y)
         subsample=model.subsample,
         iters=model.iters,
     )
-    fitted = svmtrain(svr, Xmatrix, y)
+    fitted = svmtrain(svr, X, y)
     fitresult = (deepcopy(svr), fitted)
 
     report = (
