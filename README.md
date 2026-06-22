@@ -4,7 +4,7 @@
 [![CI](https://github.com/edwinb-ai/LeastSquaresSVM/workflows/CI/badge.svg)](https://github.com/edwinb-ai/LeastSquaresSVM/actions?query=workflow%3ACI)
 [![codecov](https://codecov.io/gh/edwinb-ai/LeastSquaresSVM/branch/main/graph/badge.svg?token=U0HVBJ0ks7)](https://codecov.io/gh/edwinb-ai/LeastSquaresSVM)
 
-This is an implementation in pure `Julia` of the Least Squares Support Vector Machines [1] by Suykens and Vandewalle.
+This is an implementation in `Julia` of the Least Squares Support Vector Machines [1] by Suykens and Vandewalle.
 It contains both a **classifier** and a **regressor** implementation.
 
 # Installation
