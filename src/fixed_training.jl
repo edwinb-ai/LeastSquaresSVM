@@ -30,21 +30,22 @@ function _nystroem_renyi(k::Kernel, X::AbstractMatrix, n, m; iters=50_000)
     @assert m < n
 
     best = -Inf
-    old = 0
     r = m / n
-    Cs = Matrix{eltype(X)}(undef, m, m)
-    idxs = Vector{Int}(undef, m)
+    best_Cs = Matrix{eltype(X)}(undef, m, m)
+    best_idxs = Vector{Int}(undef, m)
 
     for _ in 1:iters
         idxs = _sampleindex(X, r)
-        C, Cs = _sample_matrix(k, X, idxs)
-        old = _renyi_entropy(Cs, n, m)
-        if old > best
-            best = old
+        _, Cs = _sample_matrix(k, X, idxs)
+        ent = _renyi_entropy(Cs, n, m)
+        if ent > best
+            best = ent
+            best_Cs = Cs
+            best_idxs = idxs
         end
     end
 
-    return best, Cs, idxs
+    return best, best_Cs, best_idxs
 end
 
 function factorization_entropy(svm::FixedSizeSVR, X, y)
