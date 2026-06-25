@@ -28,12 +28,6 @@ end
 const LSSVMTypes = Union{LSSVClassifier,LSSVRegressor}
 
 ###
-### Trait declarations for the target values for the classifier
-###
-
-MMI.target_scitype(::Type{<:LSSVClassifier}) = AbstractVector{<:ST.Finite}
-
-###
 ### Data front-end
 ###
 
@@ -42,22 +36,12 @@ MMI.target_scitype(::Type{<:LSSVClassifier}) = AbstractVector{<:ST.Finite}
 function MMI.reformat(::Union{LSSVMTypes,FixedSizeRegressor}, X, y)
     return (MMI.matrix(X; transpose=true), y)
 end
-# MMI.reformat(::FixedSizeRegressor, X, y) = MMI.matrix(X; transpose=true)
 
-## Select rows
-function MMI.selectrows(svm::FixedSizeRegressor, I, A, y)
-    X_matrix = view(A, :, I)
-    y_target = view(y, I)
-
-    svr = FixedSizeSVR(;
-        kernel=svm.kernel,
-        γ=svm.γ,
-        σ=svm.σ,
-        subsample=svm.subsample,
-        iters=svm.iters,
-    )
-
-    return factorization_entropy(svr, X_matrix, y_target)
+## Select rows. Observations are the columns of the reformatted (transposed)
+## matrix, so we slice along the second dimension and return a proper tuple.
+function MMI.selectrows(::Union{LSSVMTypes,FixedSizeRegressor}, I, A, y)
+    # Materialize (not views): downstream BLAS calls need contiguous arrays.
+    return (A[:, I], y[I])
 end
 
 # * Prediction methods
@@ -65,13 +49,9 @@ end
 function MMI.reformat(::Union{LSSVMTypes,FixedSizeRegressor}, X)
     return (MMI.matrix(X; transpose=true),)
 end
-MMI.reformat(::FixedSizeRegressor, X, y) = MMI.matrix(X; transpose=true)
 
-# Select rows
-function MMI.selectrows(::FixedSizeRegressor, I, A)
-    matrix_view = view(A, :, I)
-
-    return matrix_view
+function MMI.selectrows(::Union{LSSVMTypes,FixedSizeRegressor}, I, A)
+    return (A[:, I],)
 end
 
 ##
@@ -119,7 +99,6 @@ function MMI.fit(model::LSSVRegressor, verbosity::Int, X, y)
     return (fitresult, cache, report)
 end
 
-# TODO: It looks like the reformat is not working as expected, it is returning all the elements from the arrays as arguements, perhaps this is not the right way to do it
 function MMI.fit(model::FixedSizeRegressor, verbosity::Int, X, y)
     cache = nothing
 
@@ -130,7 +109,9 @@ function MMI.fit(model::FixedSizeRegressor, verbosity::Int, X, y)
         subsample=model.subsample,
         iters=model.iters,
     )
-    fitted = svmtrain(svr, X, y)
+    # Build the Nyström/entropy factorization, then solve the fixed-size problem
+    info = factorization_entropy(svr, X, y)
+    fitted = svmtrain(svr, info.matrices, info.target)
     fitresult = (deepcopy(svr), fitted)
 
     report = (
@@ -170,10 +151,9 @@ function MMI.predict(::LSSVRegressor, fitresult, Xmatrix)
     return results
 end
 
-# TODO: For some reason, the `selectrows` method does not return the matrix, but instead it returns the unrolled array as arguments
 function MMI.predict(::FixedSizeRegressor, fitresult, Xnew)
     (svr, fitted) = fitresult
-    results = svmpredict(svr, fitted, Xmatrix)
+    results = svmpredict(svr, fitted, Xnew)
 
     return results
 end
@@ -195,29 +175,23 @@ MMI.metadata_pkg.(
     is_wrapper=false,
 )
 
-MMI.metadata_model(
-    LSSVClassifier;
+MMI.metadata_model(LSSVClassifier,
     input=MMI.Table(MMI.Continuous),
     target=AbstractVector{MMI.Finite},
     weights=false,
-    descr="A Least Squares Support Vector Classifier implementation.",
     path="LeastSquaresSVM.LSSVClassifier",
 )
 
-MMI.metadata_model(
-    LSSVRegressor;
+MMI.metadata_model(LSSVRegressor,
     input=MMI.Table(MMI.Continuous),
     target=AbstractVector{MMI.Continuous},
     weights=false,
-    descr="A Least Squares Support Vector Regressor implementation.",
     path="LeastSquaresSVM.LSSVRegressor",
 )
 
-MMI.metadata_model(
-    FixedSizeRegressor;
+MMI.metadata_model(FixedSizeRegressor,
     input=MMI.Table(MMI.Continuous),
     target=AbstractVector{MMI.Continuous},
     weights=false,
-    descr="A Fixed Size Least Squares Support Vector Regressor implementation.",
     path="LeastSquaresSVM.FixedSizeRegressor",
 )

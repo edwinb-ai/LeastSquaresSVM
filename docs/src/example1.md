@@ -1,5 +1,5 @@
 ```@meta
-EditURL = "<unknown>/src/examples/example1.jl"
+EditURL = "examples/example1.jl"
 ```
 
 # Classification of the Wisconsin breast cancer dataset

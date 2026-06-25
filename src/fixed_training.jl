@@ -11,7 +11,7 @@ end
 
 function _sample_matrix(k::Kernel, X::AbstractMatrix, S::Vector{<:Integer})
     X_obs = view(X, :, S)
-    C = kernelmatrix(k, X_obs, X)
+    C = kernelmatrix(k, X_obs, X; obsdim=2)
     Cs = C[:, S]
 
     return (C, Cs)
@@ -105,7 +105,7 @@ function svmpredict(svm::FixedSizeSVR, fits, xnew)
     (x, alphas, bias, idxs) = fits
     kwargs = _kwargs2dict(svm)
     k = _choose_kernel(; kwargs...)
-    kern_mat = transpose(kernelmatrix(k, xnew, view(x, :, idxs)))
+    kern_mat = transpose(kernelmatrix(k, xnew, view(x, :, idxs); obsdim=2))
     alphas = dropdims(alphas; dims=1)
     result = prod_reduction(kern_mat, alphas) .+ bias
 

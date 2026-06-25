@@ -70,7 +70,7 @@ self_tuning_model = TunedModel(
     tuning=Grid(goal=400, rng=rng),
     resampling=CV(nfolds=5),
     range=[r1, r2],
-    measure=MLJBase.rms,
+    measure=MLJ.rms,
     acceleration=CPUThreads(), # We use this to enable multithreading
 );
 
@@ -82,7 +82,7 @@ fitted_params(mach).best_model
 # Having found the best hyperparameters for the regressor model we proceed to check how the
 # model generalizes and we use the test set to check the performance.
 ŷ = MLJBase.predict(mach, rows=test);
-result = round(MLJBase.rms(ŷ, y[test]), sigdigits=4);
+result = round(MLJ.rms(ŷ, y[test]), sigdigits=4);
 @show result # Check the result
 
 # We can see that we did quite well. A value of 1, or close enough, is good. We expect it

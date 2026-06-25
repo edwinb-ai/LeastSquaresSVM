@@ -1,5 +1,5 @@
 ```@meta
-EditURL = "<unknown>/src/examples/example3.jl"
+EditURL = "examples/example3.jl"
 ```
 
 # Using different kernels

@@ -36,14 +36,14 @@ function _build_kernel_matrix(x; kwargs...)
         # Create the kernel with the corresponding scale
         t = ScaleTransform(_revert(kwargs[:sigma]))
         κ = SqExponentialKernel() ∘ t
-        kern_mat = kernelmatrix(κ, x)
+        kern_mat = kernelmatrix(κ, x; obsdim=2)
     elseif kernel == :linear
         κ = LinearKernel()
-        kern_mat = kernelmatrix(κ, x)
+        kern_mat = kernelmatrix(κ, x; obsdim=2)
     elseif kernel == :poly
         # Create the kernel with the corresponding degree
         κ = PolynomialKernel(; degree=kwargs[:degree], c=0.0)
-        kern_mat = kernelmatrix(κ, x)
+        kern_mat = kernelmatrix(κ, x; obsdim=2)
     end
 
     return kern_mat
@@ -60,14 +60,14 @@ function _build_kernel_matrix(x, y; kwargs...)
         # Create the kernel with the corresponding scale
         t = ScaleTransform(_revert(kwargs[:sigma]))
         κ = SqExponentialKernel() ∘ t
-        kern_mat = kernelmatrix(κ, x, y)
+        kern_mat = kernelmatrix(κ, x, y; obsdim=2)
     elseif kernel == :linear
         κ = LinearKernel()
-        kern_mat = kernelmatrix(κ, x, y)
+        kern_mat = kernelmatrix(κ, x, y; obsdim=2)
     elseif kernel == :poly
         # Create the kernel with the corresponding degree
         κ = PolynomialKernel(; degree=kwargs[:degree], c=0.0)
-        kern_mat = kernelmatrix(κ, x, y)
+        kern_mat = kernelmatrix(κ, x, y; obsdim=2)
     end
 
     return kern_mat
