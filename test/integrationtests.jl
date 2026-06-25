@@ -33,7 +33,7 @@ using CategoricalArrays
     train, test = partition(eachindex(y), 2 / 3, shuffle=true, rng=15)
 
     # Define a good set of hyperparameters for this problem
-    pipe = MLJ.@pipeline(Standardizer(count=true), LSSVClassifier(γ=80.0, σ=0.233333))
+    pipe = MLJ.Pipeline(Standardizer(count=true), LSSVClassifier(γ=80.0, σ=0.233333))
     mach = MLJ.machine(pipe, X, y)
     MLJ.fit!(mach, rows=train, verbosity=0)
 
@@ -56,7 +56,7 @@ end
     train, test = partition(eachindex(y), 0.75, shuffle=true, rng=20)
 
     # Define a good set of hyperparameters for this problem
-    model = MLJ.@pipeline(Standardizer(), LSSVRegressor(γ=10.0, σ=0.5))
+    model = MLJ.Pipeline(Standardizer(), LSSVRegressor(γ=10.0, σ=0.5))
     mach = MLJ.machine(model, X, y)
     MLJ.fit!(mach, rows=train, verbosity=0)
 
@@ -70,7 +70,7 @@ end
 @testset "Multiclass classification" begin
     X, y = MLJ.@load_iris
     train, test = partition(eachindex(y), 0.6, shuffle=true, rng=30)
-    pipe = MLJ.@pipeline(Standardizer(), LSSVClassifier(γ=80.0, σ=0.1))
+    pipe = MLJ.Pipeline(Standardizer(), LSSVClassifier(γ=80.0, σ=0.1))
     mach = MLJ.machine(pipe, X, y)
     MLJ.fit!(mach, rows=train, verbosity=0)
     results = MLJ.predict(mach, rows=test)
