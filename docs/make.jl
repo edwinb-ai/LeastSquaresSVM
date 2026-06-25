@@ -28,5 +28,5 @@ makedocs(;
 deploydocs(;
     repo="github.com/edwinb-ai/LeastSquaresSVM.git",
     devbranch="main",
-    push_preview=true
+    push_preview=false
 )
