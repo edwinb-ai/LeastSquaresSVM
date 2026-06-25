@@ -4,8 +4,9 @@ using Documenter
 # * Build the complete documentation
 makedocs(;
     modules=[LeastSquaresSVM],
+    checkdocs=:exports,
     authors="Edwin Bedolla",
-    repo="https://github.com/edwinb-ai/LeastSquaresSVM/blob/{commit}{path}#L{line}",
+    repo=Documenter.Remotes.GitHub("edwinb-ai", "LeastSquaresSVM"),
     sitename="LeastSquaresSVM",
     format=Documenter.HTML(;
         prettyurls=get(ENV, "CI", "false") == "true",
@@ -27,5 +28,5 @@ makedocs(;
 deploydocs(;
     repo="github.com/edwinb-ai/LeastSquaresSVM.git",
     devbranch="main",
-    push_preview=true
+    push_preview=false
 )
