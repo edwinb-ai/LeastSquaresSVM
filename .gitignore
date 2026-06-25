@@ -2,3 +2,9 @@
 *.jl.cov
 *.jl.mem
 /docs/build/
+
+# Environment lockfiles are resolved per-user; not tracked for a package
+Manifest.toml
+
+# Local Claude Code guidance, not shared
+/CLAUDE.md
