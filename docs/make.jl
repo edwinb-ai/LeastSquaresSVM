@@ -6,7 +6,7 @@ makedocs(;
     modules=[LeastSquaresSVM],
     checkdocs=:exports,
     authors="Edwin Bedolla",
-    repo="https://github.com/edwinb-ai/LeastSquaresSVM/blob/{commit}{path}#L{line}",
+    repo=Documenter.Remotes.GitHub("edwinb-ai", "LeastSquaresSVM"),
     sitename="LeastSquaresSVM",
     format=Documenter.HTML(;
         prettyurls=get(ENV, "CI", "false") == "true",

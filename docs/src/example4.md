@@ -1,5 +1,5 @@
 ```@meta
-EditURL = "<unknown>/src/examples/example4.jl"
+EditURL = "examples/example4.jl"
 ```
 
 # Multiclass classification
