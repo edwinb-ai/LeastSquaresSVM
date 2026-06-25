@@ -105,7 +105,7 @@ self_tuning_model = TunedModel(
     tuning=Grid(goal=400, rng=rng),
     resampling=CV(nfolds=5),
     range=[r1, r2],
-    measure=MLJBase.rms,
+    measure=MLJ.rms,
     acceleration=CPUThreads(), # We use this to enable multithreading
 );
 nothing #hide
@@ -124,7 +124,7 @@ model generalizes and we use the test set to check the performance.
 
 ```@example example2
 ŷ = MLJBase.predict(mach, rows=test);
-result = round(MLJBase.rms(ŷ, y[test]), sigdigits=4);
+result = round(MLJ.rms(ŷ, y[test]), sigdigits=4);
 @show result # Check the result
 ```
 

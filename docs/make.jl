@@ -4,6 +4,7 @@ using Documenter
 # * Build the complete documentation
 makedocs(;
     modules=[LeastSquaresSVM],
+    checkdocs=:exports,
     authors="Edwin Bedolla",
     repo="https://github.com/edwinb-ai/LeastSquaresSVM/blob/{commit}{path}#L{line}",
     sitename="LeastSquaresSVM",
