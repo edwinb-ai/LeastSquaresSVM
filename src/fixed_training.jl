@@ -1,51 +1,62 @@
-function _sampleindex(X::AbstractMatrix, r::Real)
-    # Check that `r` is always within the open interval (0, 1]
-    0 < r <= 1 || throw(ArgumentError("Sample rate `r` must be in range (0,1]"))
-    n = size(X, 2)
-    m = ceil(Int, n * r)
-    # We sample indices **without** replacement
-    S = StatsBase.sample(1:n, m; replace=false, ordered=true)
+"""
+    _quadratic_renyi_entropy(Ω) -> H
 
-    return S
-end
+Quadratic Rényi entropy estimate of the working set whose `m × m` kernel matrix is
+`Ω`: `H = -log( (1/m²) 1ᵀ Ω 1 )` (Suykens et al., eqs. 6.16-6.17). A larger value
+corresponds to a more spread-out, representative set of support vectors.
+"""
+_quadratic_renyi_entropy(Ω) = -log(sum(Ω) / size(Ω, 1)^2)
 
-function _sample_matrix(k::Kernel, X::AbstractMatrix, S::Vector{<:Integer})
-    X_obs = view(X, :, S)
-    C = kernelmatrix(k, X_obs, X; obsdim=2)
-    Cs = C[:, S]
+"""
+    _active_selection(k, X, n, m; iters, patience) -> (entropy, Ω, indices)
 
-    return (C, Cs)
-end
+Actively select a working set of `m` support vectors from the `n` training points
+(columns of `X`) by the entropy-maximization procedure of Suykens et al. (§6.2.2):
+start from a random working set and repeatedly propose replacing one randomly
+chosen support vector with a random non-member candidate, accepting the swap only
+when it increases the quadratic Rényi entropy. Returns the working-set entropy, its
+`m × m` kernel matrix `Ω`, and the selected column indices.
 
-function _renyi_entropy(X::AbstractMatrix, N::Integer, M::Integer)
-    ones_m = ones(M)
-    integral = BL.gemv('N', 1.0, X, ones_m)
-    entropy = BL.dot(M, ones_m, 1, integral, 1)
-    entropy /= N^2
-
-    return -log(entropy)
-end
-
-function _nystroem_renyi(k::Kernel, X::AbstractMatrix, n, m; iters=50_000)
+Iteration stops after `iters` proposals, or once `patience` consecutive proposals
+have been rejected (the entropy has plateaued).
+"""
+function _active_selection(k::Kernel, X::AbstractMatrix, n, m; iters=50_000, patience=10 * m)
     @assert m < n
 
-    best = -Inf
-    r = m / n
-    best_Cs = Matrix{eltype(X)}(undef, m, m)
-    best_idxs = Vector{Int}(undef, m)
+    working = StatsBase.sample(1:n, m; replace=false)
+    inset = falses(n)
+    inset[working] .= true
 
+    Ω = kernelmatrix(k, view(X, :, working); obsdim=2)
+    H = _quadratic_renyi_entropy(Ω)
+
+    stall = 0
     for _ in 1:iters
-        idxs = _sampleindex(X, r)
-        _, Cs = _sample_matrix(k, X, idxs)
-        ent = _renyi_entropy(Cs, n, m)
-        if ent > best
-            best = ent
-            best_Cs = Cs
-            best_idxs = idxs
+        pos = rand(1:m)
+        old = working[pos]
+        # Draw a candidate that is not already a support vector.
+        cand = rand(1:n)
+        while inset[cand]
+            cand = rand(1:n)
+        end
+
+        working[pos] = cand
+        Ω_try = kernelmatrix(k, view(X, :, working); obsdim=2)
+        H_try = _quadratic_renyi_entropy(Ω_try)
+
+        if H_try > H                 # accept the swap: entropy increased
+            inset[old] = false
+            inset[cand] = true
+            Ω, H = Ω_try, H_try
+            stall = 0
+        else                         # reject and restore the previous support vector
+            working[pos] = old
+            stall += 1
+            stall >= patience && break
         end
     end
 
-    return best, best_Cs, best_idxs
+    return H, Ω, working
 end
 
 function factorization_entropy(svm::FixedSizeSVR, X, y)
@@ -57,7 +68,7 @@ function factorization_entropy(svm::FixedSizeSVR, X, y)
     # the m × m kernel matrix of that working set for the Nyström approximation.
     kwargs = _kwargs2dict(svm)
     k = _choose_kernel(; kwargs...)
-    (_, K_mm, idxs) = _nystroem_renyi(k, X, n, m; iters=svm.iters)
+    (_, K_mm, idxs) = _active_selection(k, X, n, m; iters=svm.iters)
 
     # Spectral decomposition of the (symmetric) prototype kernel matrix.
     fact = eigen(Symmetric(K_mm))

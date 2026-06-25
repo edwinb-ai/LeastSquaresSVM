@@ -56,3 +56,29 @@ _rmse(a, b) = sqrt(sum(abs2, a .- b) / length(b))
     # Nyström convergence: more prototypes reduce the error.
     @test rmse60 < rmse15
 end
+
+@testset "Fixed Size: entropy-based active selection" begin
+    rng = MersenneTwister(7)
+    n, m = 300, 25
+    X = randn(rng, 2, n)
+    k = LeastSquaresSVM._choose_kernel(; kernel=:rbf, sigma=1.0, degree=0)
+    ent(idx) = LeastSquaresSVM._quadratic_renyi_entropy(
+        LeastSquaresSVM.kernelmatrix(k, view(X, :, idx); obsdim=2)
+    )
+
+    Random.seed!(99)
+    H_sel, Ω_sel, idxs = LeastSquaresSVM._active_selection(k, X, n, m; iters=2000)
+
+    # The selection returns a valid working set of m distinct training points.
+    @test length(idxs) == m
+    @test length(unique(idxs)) == m
+    @test all(i -> 1 <= i <= n, idxs)
+
+    # The returned entropy and Ω are consistent with the selected working set.
+    @test Ω_sel ≈ LeastSquaresSVM.kernelmatrix(k, view(X, :, idxs); obsdim=2)
+    @test H_sel ≈ ent(idxs)
+
+    # Active selection maximizes entropy: it beats the average random subset.
+    H_rand = sum(ent(randperm(n)[1:m]) for _ in 1:20) / 20
+    @test H_sel > H_rand
+end
