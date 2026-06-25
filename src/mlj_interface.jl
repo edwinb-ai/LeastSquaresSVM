@@ -103,7 +103,7 @@ end
 ##
 
 # shared metadata
-const LSSVM = (LSSVC, LSSVR)
+const LSSVM = (LSSVClassifier, LSSVRegressor)
 
 MMI.metadata_pkg.(LSSVM,
     name="LeastSquaresSVM",
@@ -113,18 +113,16 @@ MMI.metadata_pkg.(LSSVM,
     license="MIT",
     is_wrapper=false)
 
-MMI.metadata_model(LSSVC,
+MMI.metadata_model(LSSVClassifier,
     input=MMI.Table(MMI.Continuous),
     target=AbstractVector{MMI.Finite},
     weights=false,
-    descr="A Least Squares Support Vector Classifier implementation.",
-    path="LeastSquaresSVM.LSSVC",
+    path="LeastSquaresSVM.LSSVClassifier",
 )
 
-MMI.metadata_model(LSSVR,
+MMI.metadata_model(LSSVRegressor,
     input=MMI.Table(MMI.Continuous),
     target=AbstractVector{MMI.Continuous},
     weights=false,
-    descr="A Least Squares Support Vector Regressor implementation.",
-    path="LeastSquaresSVM.LSSVR",
+    path="LeastSquaresSVM.LSSVRegressor",
 )
