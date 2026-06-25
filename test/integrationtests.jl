@@ -69,7 +69,7 @@ end
 
 @testset "MLJ Integration Fixed Size Regressor" begin
     n = 500 # Total number of points or samples
-    m = 10 # Subset of points or samples
+    m = 50 # Subset of points or samples
     X, y = MLJ.make_regression(n, 2; noise=0.5, rng=18) # Here, 2 is the number of features
     df = DataFrame(X)
     df.y = y
@@ -81,26 +81,28 @@ end
     stand1 = MLJ.Standardizer()
     X = MLJ.transform(MLJ.fit!(MLJ.machine(stand1, X)), X)
 
-    # Define some hyperparameters for the Fixed Size regressor
-    fixed_svr = FixedSizeRegressor(γ=6.0, σ=4500, subsample=m)
+    # Fixed-Size regressor with sane hyperparameters. (A degenerate kernel width
+    # makes every model predict ~the mean and would hide a broken solve.)
+    Random.seed!(11) # deterministic support-vector selection
+    fixed_svr = FixedSizeRegressor(γ=10.0, σ=1.0, subsample=m, iters=500)
     mach = MLJ.machine(fixed_svr, X, y)
     MLJ.fit!(mach, rows=train, verbosity=0)
     ŷ = MLJ.predict(mach, rows=test)
-    result = round(MLJ.rms(ŷ, y[test]), sigdigits=4)
-    println("Fixed size")
-    @show result
+    rmse_fixed = MLJ.rms(ŷ, y[test])
 
-    # Repeat the problem with a baseline regressor
-    svr = LSSVRegressor(γ=6.0, σ=4500)
-    mach = MLJ.machine(svr, X, y)
-    MLJ.fit!(mach, rows=train, verbosity=0)
-    ŷ = MLJ.predict(mach, rows=test)
-    result = round(MLJ.rms(ŷ, y[test]), sigdigits=4)
-    println("Baseline")
-    @show result
+    # Baseline: the full LS-SVR with the same hyperparameters.
+    base = LSSVRegressor(γ=10.0, σ=1.0)
+    machb = MLJ.machine(base, X, y)
+    MLJ.fit!(machb, rows=train, verbosity=0)
+    rmse_base = MLJ.rms(MLJ.predict(machb, rows=test), y[test])
 
-    # Test for correctness
-    @test isreal(result)
+    # Naive baseline: predicting the training mean.
+    ymean = sum(y[train]) / length(train)
+    rmse_naive = MLJ.rms(fill(ymean, length(test)), y[test])
+
+    @test all(isfinite, ŷ)
+    @test rmse_fixed < rmse_naive      # the model actually learns
+    @test rmse_fixed < 2 * rmse_base   # and approaches the full LS-SVR
 end
 
 @testset "Multiclass classification" begin

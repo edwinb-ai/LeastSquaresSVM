@@ -53,65 +53,84 @@ function factorization_entropy(svm::FixedSizeSVR, X, y)
     n = size(y, 1)
     m = svm.subsample
 
-    # Use this information to create the Nyström approximation
+    # Actively select a working set of `m` prototype (support) vectors and obtain
+    # the m × m kernel matrix of that working set for the Nyström approximation.
     kwargs = _kwargs2dict(svm)
     k = _choose_kernel(; kwargs...)
-    (_, Cs, idxs) = _nystroem_renyi(k, X, n, m; iters=svm.iters)
+    (_, K_mm, idxs) = _nystroem_renyi(k, X, n, m; iters=svm.iters)
 
-    # We do a spectral decomposition
-    fact = eigen(Cs)
-
-    # We now augment the kernel matrix with ones to include the
-    # bias term
-    kern_mat_aug = hcat(fact.vectors, ones(m))
+    # Spectral decomposition of the (symmetric) prototype kernel matrix.
+    fact = eigen(Symmetric(K_mm))
 
     # Build a named tuple for all the information
     info_tuple = (
-        matrices=(X_matrix=X, eigen_fact=fact, aug_matrix=kern_mat_aug),
+        matrices=(X_matrix=X, eigen_fact=fact),
         target=(y_target=y, idxs=idxs),
     )
 
     return info_tuple
 end
 
+"""
+    _nystrom_map(fact) -> P
+
+Build the Nyström projection `P = U Λ^{-1/2}` from the eigendecomposition `fact`
+of the m × m prototype kernel matrix, keeping only the numerically significant
+eigenpairs (so a point's approximate feature vector is `φ̂(x) = (k_m(x))ᵀ P`,
+following eq. (6.12) of Suykens et al.). Truncating tiny eigenvalues avoids the
+`1/√λ` blow-up.
+"""
+function _nystrom_map(fact)
+    λ = fact.values
+    U = fact.vectors
+    tol = sqrt(eps(float(eltype(λ)))) * maximum(λ)
+    keep = λ .> tol
+    return U[:, keep] ./ sqrt.(λ[keep])'
+end
+
 function svmtrain(svm::FixedSizeSVR, X, y)
     # Extract the necessary data from the arguments
-    (X_matrix, fact, kern_mat_aug) = X
+    (X_matrix, fact) = X
     (y_target, idxs) = y
+    n = size(X_matrix, 2)
 
-    # Create a square matrix A^T * A from subsampled data
-    sq_mat = kern_mat_aug' * kern_mat_aug
+    # Nyström feature map and the feature matrix Φ for ALL n training points:
+    # Φ = K_nm * P  (size n × r), with K_nm the kernel between every training
+    # point and the m prototypes.
+    P = _nystrom_map(fact)
+    kwargs = _kwargs2dict(svm)
+    k = _choose_kernel(; kwargs...)
+    prototypes = view(X_matrix, :, idxs)
+    K_nm = kernelmatrix(k, X_matrix, prototypes; obsdim=2)
+    Φ = K_nm * P
+    r = size(Φ, 2)
 
-    # We need the correct size for the vector
-    b = kern_mat_aug' * y_target[idxs]
+    # Primal ridge regression over all n points (Suykens et al., eq. 6.11):
+    #   min_{w,b} (1/2)‖w‖² + (γ/2) Σ_{k=1}^n (y_k - wᵀφ̂(x_k) - b)².
+    # Solve the regularized normal equations; the 1/γ ridge applies to w only,
+    # not to the bias term.
+    A = hcat(Φ, ones(eltype(Φ), n))
+    H = A' * A
+    @inbounds for i in 1:r
+        H[i, i] += 1.0 / svm.γ
+    end
+    θ = H \ (A' * y_target)
+    weights = θ[1:r]
+    bias = θ[end]
 
-    # We now solve the ridge regression problem, here we are using an iterative method
-    λ_reg = 1.0 / svm.γ # The regularization parameter
-    result, stats = cgls(sq_mat, b; λ=λ_reg)
-    @assert check_if_solved(stats) == true # Always check if the iterative method converges
+    # Dual support values for the decision function: α = P w  (eq. 6.14), so the
+    # model is y(x) = Σ_k α_k K(x_k, x) + b.
+    alphas = P * weights
 
-    # Extract the weights and the bias found
-    weights = result[1:(end - 1)]
-    bias = result[end]
-
-    # Compute the alphas(i.e. weights) for the decision function
-    alphas = svm.subsample .* fact.vectors
-    @. alphas /= sqrt(fact.values)
-    result = prod_reduction(alphas, weights)
-
-    return X_matrix, result, bias, idxs
+    return X_matrix, alphas, bias, idxs
 end
 
 function svmpredict(svm::FixedSizeSVR, fits, xnew)
     (x, alphas, bias, idxs) = fits
     kwargs = _kwargs2dict(svm)
     k = _choose_kernel(; kwargs...)
-    kern_mat = transpose(kernelmatrix(k, xnew, view(x, :, idxs); obsdim=2))
-    alphas = dropdims(alphas; dims=1)
-    result = prod_reduction(kern_mat, alphas) .+ bias
+    prototypes = view(x, :, idxs)
+    kern_mat = kernelmatrix(k, xnew, prototypes; obsdim=2)  # (n_new × m)
 
-    # We need to remove the trailing dimension
-    result = dropdims(result; dims=1)
-
-    return result
+    return kern_mat * alphas .+ bias
 end
